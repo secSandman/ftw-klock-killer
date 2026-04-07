@@ -1,0 +1,35 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║   FTW-KLOC-KILLER  —  requirements.txt                          ║
+# ║   Arr. Install these or walk the plank.                          ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# ── Core (existing InB deps) ─────────────────────────────────────────
+gitpython>=3.1.41
+matplotlib>=3.8.0
+numpy>=1.26.0
+
+# ── Multi-language parsing ────────────────────────────────────────────
+# tree_sitter_languages = mega-package with C, Go, Rust, Python + 40 others
+# If it fails on Windows: pip install tree-sitter-c tree-sitter-go tree-sitter-rust
+tree-sitter>=0.22.0
+tree-sitter-languages>=1.10.2
+
+# ── RAG / Vector DB ──────────────────────────────────────────────────
+qdrant-client>=1.9.0
+sentence-transformers>=2.7.0    # all-MiniLM-L6-v2  384-dim  local  free
+
+# ── LLM providers (BALANCER uses these for T1-T3 routing) ────────────
+anthropic>=0.25.0
+openai>=1.30.0                  # optional; T3 fallback + text-embedding-3-small
+
+# ── Schema / serialization ────────────────────────────────────────────
+pydantic>=2.7.0                 # FeatureSlice schema validation
+python-dotenv>=1.0.0            # loads .env
+ujson>=5.9.0                    # fast JSONL for message bus
+
+# ── Testing ───────────────────────────────────────────────────────────
+pytest>=8.2.0
+pytest-timeout>=2.3.0
+
+# ── Optional (not required — InB has its own token counter) ──────────
+# tiktoken>=0.7.0

@@ -1,0 +1,85 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.so
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+ENV/
+env/
+.env
+!.env.example
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+*.key
+*.pem
+*.p12
+secrets.json
+credentials.json
+
+# ── InB runtime artifacts ─────────────────────────────────────────────────────
+inb_registry.json
+bus/queues/
+bus/audit/
+orchestrator/state/
+data/rainbow_stdlib_python.jsonl
+data/rainbow_stdlib_c.jsonl
+
+# ── Test artifacts ────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.coveragerc
+coverage.xml
+
+# ── Vector DB / Docker ───────────────────────────────────────────────────────
+kloc_qdrant_storage/
+.docker/
+
+# ── Corpus / game source (large — download on demand) ────────────────────────
+data/test_corpus/
+doom/
+
+# ── Generated HTML reports (rebuild with kloc.py report-c) ───────────────────
+reports/*/
+
+# ── Experiment results (generated — keep locally, not tracked) ───────────────
+experiments/results/
+
+# ── References (source research material — not part of the runnable project) ─
+references/
+references_zips/
+
+# ── OS noise ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/

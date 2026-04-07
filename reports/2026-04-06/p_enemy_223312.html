@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>C Compression Report — p_enemy.c — 2026-04-06 22:33:12</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0d1117;--sf:#161b22;--bd:#30363d;--tx:#e6edf3;--mt:#8b949e;
+      --ac:#58a6ff;--gr:#3fb950;--yw:#d29922;--rd:#f85149;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      padding:28px;max-width:1280px;margin:0 auto;line-height:1.6}
+h1{font-size:1.55rem;color:var(--ac);margin-bottom:4px}
+h2{font-size:.8rem;color:var(--mt);text-transform:uppercase;letter-spacing:.12em;
+    margin:36px 0 14px;border-bottom:1px solid var(--bd);padding-bottom:7px}
+.meta{color:var(--mt);font-size:.8rem;margin-bottom:26px}
+.kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:18px 20px}
+.big{font-size:1.9rem;font-weight:700;line-height:1.1}
+.lbl{font-size:.71rem;color:var(--mt);margin-top:5px}
+.charts2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.cw{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:20px}
+canvas{max-height:280px}
+.sect{background:var(--sf);border:1px solid var(--bd);border-radius:8px;
+       padding:20px;margin-bottom:22px;overflow-x:auto}
+.summary{font-size:.87rem;line-height:1.8}
+.summary strong{color:var(--ac)}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{background:rgba(48,54,61,.7);color:var(--mt);text-align:left;
+    padding:8px 12px;border-bottom:1px solid var(--bd);
+    font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+td{padding:8px 12px;border-bottom:1px solid rgba(48,54,61,.4);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(88,166,255,.04)}
+.saved{color:var(--gr);font-weight:600}
+.neg{color:var(--rd)}
+.mono{font-family:"SF Mono","Fira Code",monospace;font-size:.78rem;color:var(--mt)}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.68rem;
+        font-weight:700;background:rgba(88,166,255,.2);color:var(--ac)}
+.zone{padding:2px 8px;border-radius:10px;font-size:.71rem;font-weight:600}
+.zone-hdr{background:rgba(210,153,34,.15);color:var(--yw)}
+.zone-fg{background:rgba(248,81,73,.15);color:var(--rd)}
+.zone-bg{background:rgba(63,185,80,.15);color:var(--gr)}
+.qpass{color:var(--gr);font-weight:700}
+.qwarn{color:var(--yw);font-weight:700}
+.qfail{color:var(--rd);font-weight:700}
+.tv{display:flex;gap:44px;align-items:flex-start;padding:8px 0;flex-wrap:wrap}
+.tv-v{font-size:1.9rem;font-weight:700;line-height:1.1}
+.tv-l{font-size:.7rem;color:var(--mt);margin-top:4px}
+/* ROI Calculator */
+.calc{background:var(--sf);border:1px solid var(--bd);border-radius:8px;
+       padding:22px;margin-bottom:22px}
+.calc h3{font-size:.78rem;color:var(--mt);text-transform:uppercase;letter-spacing:.1em;
+           margin-bottom:16px}
+.calc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.field label{display:block;font-size:.7rem;color:var(--mt);margin-bottom:5px;
+              text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{
+  width:100%;background:#0d1117;border:1px solid var(--bd);border-radius:5px;
+  color:var(--tx);padding:7px 10px;font-size:.87rem;outline:none}
+.field input:focus,.field select:focus{border-color:var(--ac)}
+.calc-out{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.calc-card{background:#0d1117;border:1px solid var(--bd);border-radius:7px;padding:14px}
+.calc-card .cv{font-size:1.45rem;font-weight:700;color:var(--gr)}
+.calc-card .cl{font-size:.68rem;color:var(--mt);margin-top:3px}
+.note{font-size:.73rem;color:var(--mt);margin-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+<div style="width:100%;border-radius:10px;overflow:hidden;margin-bottom:24px;background:#000;text-align:center">
+  <img src="../imgs/youcancreate.png" alt="Create, because you can"
+       style="max-width:100%;max-height:340px;display:inline-block;opacity:.92">
+</div>
+<h1>&#x2620; C Compression Report &mdash; p_enemy.c</h1>
+<p class="meta">
+  doom\src\strife\p_enemy.c &nbsp;&middot;&nbsp; repo: doom
+  &nbsp;&middot;&nbsp; 265 KQ patterns mined
+  &nbsp;&middot;&nbsp; analysis in 0.181s
+  &nbsp;&middot;&nbsp; generated 2026-04-06 22:33:12
+</p>
+
+<!-- ── KPI cards ────────────────────────────────────────────────────────── -->
+<div class="kpi">
+  <div class="card">
+    <div class="big" style="color:#d29922">54.4%</div>
+    <div class="lbl">TER &mdash; full pipeline (target &gt;80%)</div>
+  </div>
+  <div class="card">
+    <div class="big" style="color:#d29922">0.731</div>
+    <div class="lbl">RQS-L1 semantic similarity (&ge;0.85 pass)</div>
+  </div>
+  <div class="card">
+    <div class="big">17,886</div>
+    <div class="lbl">Original tokens (whole file)</div>
+  </div>
+  <div class="card">
+    <div class="big" style="color:var(--gr)">8,153</div>
+    <div class="lbl">Compressed tokens &mdash; saved 9,733</div>
+  </div>
+  <div class="card">
+    <div class="big" style="color:var(--ac)">0.3977</div>
+    <div class="lbl">True Value = TER &times; RQS-L1</div>
+  </div>
+</div>
+
+<!-- ── Executive Summary ─────────────────────────────────────────────────── -->
+<h2>Executive Summary</h2>
+<div class="sect">
+  <div class="summary"><strong>What was analysed:</strong> p_enemy.c from the doom repository — 17,886 tokens, 107 chunks (106 functions).<br><br><strong>Overall result:</strong> The full compression pipeline (F1+F3+F4) reduced this file from <strong>17,886 → 8,153 tokens</strong>, a <strong>54.4% Token Efficiency Ratio (TER)</strong>. True Value (TER × RQS) = <strong>0.3977</strong>.<br><br><strong>Primary driver — F1 Skeleton (49.4% TER):</strong> 90 of 106 functions had their bodies replaced with a single-line skeleton marker. The skeletonizer only acts on functions with a Predictability Index ≥ 0.70 (short, loop-free bodies). Top beneficiaries: P_LookForPlayers (55%), A_Look (57%), A_PeasantCrash (45%). Complex functions like P_NewChaseDir and A_Chase (PI &lt; 0.70) are left intact.<br><br><strong>Secondary driver — F3 Masking (0.1% TER):</strong> F3 (include/define masking) contributes negligibly here — the KQ placeholder tokens are nearly the same length as the patterns they replace in this file.<br><br><strong>Tertiary — F4 Caveman (6.4% TER):</strong> F4 (Caveman) trimmed stop-words from comments, saving 6.4% additional tokens.<br><br><strong>Quality:</strong> ⚠ Quality gate: RQS-L1 = 0.731 is below the 0.85 threshold. Consider reducing the skeleton aggressiveness.<br><br><strong>What is not in scope:</strong> This report covers single-file compression only. Multi-file ETL, cross-file deduplication, and RAG embedding are separate pipeline stages. Token counts use the cl100k tokeniser (GPT-4 family); actual savings on Claude's tokeniser may vary slightly.</div>
+</div>
+
+<!-- ── Algorithm Contribution ────────────────────────────────────────────── -->
+<h2>Algorithm Contribution (Whole-File Counts)</h2>
+<div class="charts2">
+  <div class="cw"><canvas id="stageBar"></canvas></div>
+  <div class="cw"><canvas id="savingsDoughnut"></canvas></div>
+</div>
+<div class="sect">
+<table>
+<thead><tr>
+  <th>Stage</th><th>Algorithm</th>
+  <th>Tokens After</th><th>Tokens Saved</th><th>Cumulative TER</th>
+</tr></thead>
+<tbody>
+<tr><td>Baseline</td><td>&mdash; no compression</td>
+    <td>17,886</td><td>&mdash;</td><td>0.0%</td></tr>
+<tr><td><strong>F1</strong></td>
+    <td>CSkeletonizer &mdash; predictable fn bodies &rarr; <code>/*skeletonized*/</code></td>
+    <td>9,056</td>
+    <td class="saved">+8,830</td>
+    <td class="saved">49.4%</td></tr>
+<tr><td><strong>F3</strong></td>
+    <td>C_IncludeMasker &mdash; KQ #include/#define &rarr; <code>[&sect;:hash]</code></td>
+    <td>9,042</td>
+    <td class="saved">+14</td>
+    <td>49.4% (standalone: 0.1%)</td></tr>
+<tr><td><strong>F4</strong></td>
+    <td>CavemanCompressor &mdash; stop-word strip in comments</td>
+    <td>8,153</td>
+    <td class="saved">+889</td>
+    <td>54.4% (standalone: 6.4%)</td></tr>
+<tr style="font-weight:700;background:rgba(88,166,255,.06)">
+    <td colspan="2">Full Pipeline (F1 + F3 + F4)</td>
+    <td style="color:var(--gr)">8,153</td>
+    <td class="saved">+9,733</td>
+    <td class="saved">54.4%</td></tr>
+</tbody>
+</table>
+<p class="note">
+  F3 and F4 standalone TER rounds to 0.0% on this file: F3 placeholder tokens are similar
+  length to the patterns they replace; F4 finds no comments to strip. Both algorithms provide
+  more value on comment-heavy or macro-dense codebases. See Executive Summary.
+</p>
+</div>
+
+<!-- ── Toggle Comparison ─────────────────────────────────────────────────── -->
+<h2>Algorithm Toggle Comparison (Dry Run &mdash; each config independent)</h2>
+<div class="charts2">
+  <div class="cw"><canvas id="algoBar"></canvas></div>
+  <div class="cw"><canvas id="qualityLine"></canvas></div>
+</div>
+<div class="sect">
+<table>
+<thead><tr>
+  <th>Config</th><th>Description</th>
+  <th>Tokens</th><th>TER</th><th>Tokens Saved</th>
+  <th>RQS-L1</th><th>Cost/req T1 Haiku</th><th>Cost/req T2 Sonnet</th>
+</tr></thead>
+<tbody><tr><td><strong>None</strong></td><td class='mono'>No compression (baseline)</td><td>17,886</td><td class=''>0.0%</td><td class=''>0</td><td class='qpass'>1.000</td><td class='mono'>$0.00447</td><td class='mono'>$0.05366</td></tr>
+<tr><td><strong>F4 only</strong></td><td class='mono'>Caveman: stop-word strip in comments</td><td>16,743</td><td class='saved'>6.4%</td><td class='saved'>+1,143</td><td class='qpass'>0.969</td><td class='mono'>$0.00419</td><td class='mono'>$0.05023</td></tr>
+<tr><td><strong>F3 only</strong></td><td class='mono'>Masking: #include/#define→[§:tok]</td><td>17,872</td><td class=''>0.1%</td><td class=''>+14</td><td class='qpass'>1.000</td><td class='mono'>$0.00447</td><td class='mono'>$0.05362</td></tr>
+<tr><td><strong>F1 only</strong></td><td class='mono'>Skeleton: fn bodies→/*skeletonized*/</td><td>9,056</td><td class='saved'>49.4%</td><td class='saved'>+8,830</td><td class='qwarn'>0.794</td><td class='mono'>$0.00226</td><td class='mono'>$0.02717</td></tr>
+<tr><td><strong>F1+F3</strong></td><td class='mono'>Skeleton + Masking</td><td>9,042</td><td class='saved'>49.4%</td><td class='saved'>+8,844</td><td class='qwarn'>0.794</td><td class='mono'>$0.00226</td><td class='mono'>$0.02713</td></tr>
+<tr><td><strong>F1+F3+F4</strong></td><td class='mono'>Full pipeline (all three)</td><td>8,153</td><td class='saved'>54.4%</td><td class='saved'>+9,733</td><td class='qwarn'>0.731</td><td class='mono'>$0.00204</td><td class='mono'>$0.02446</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ── Business Case ─────────────────────────────────────────────────────── -->
+<h2>Business Case Analysis</h2>
+<div class="sect">
+<table>
+<thead><tr>
+  <th>Usage Scale</th>
+  <th>Daily cost without compression<br><small>T1 Haiku / T2 Sonnet</small></th>
+  <th>Daily cost with F1+F3+F4<br><small>T1 Haiku / T2 Sonnet</small></th>
+  <th>Monthly savings<br><small>T1 / T2</small></th>
+  <th>Annual savings<br><small>T2 Sonnet</small></th>
+</tr></thead>
+<tbody><tr><td>Small team<br><small class='mono'>100 req/day</small></td><td class='mono'>$0.45 / $5.37</td><td class='mono'>$0.20 / $2.45</td><td class='saved'>$7.30 / $87.60</td><td class='saved'>$1,051</td></tr>
+<tr><td>Mid-size product<br><small class='mono'>1,000 req/day</small></td><td class='mono'>$4.47 / $53.66</td><td class='mono'>$2.04 / $24.46</td><td class='saved'>$73.00 / $875.97</td><td class='saved'>$10,512</td></tr>
+<tr><td>Large platform<br><small class='mono'>10,000 req/day</small></td><td class='mono'>$44.72 / $536.58</td><td class='mono'>$20.38 / $244.59</td><td class='saved'>$729.98 / $8759.70</td><td class='saved'>$105,116</td></tr>
+<tr><td>Enterprise<br><small class='mono'>100,000 req/day</small></td><td class='mono'>$447.15 / $5365.80</td><td class='mono'>$203.82 / $2445.90</td><td class='saved'>$7299.75 / $87597.00</td><td class='saved'>$1,051,164</td></tr>
+</tbody>
+</table>
+<p class="note">
+  Each request assumed to send one file of this size (17,886 raw &rarr; 8,153 compressed tokens).
+  Real workloads mix file sizes. Preprocessing runs locally (&lt;200ms/file), cost not included.
+  T1 = Haiku $0.00025/1K; T2 = Sonnet $0.003/1K input tokens.
+</p>
+</div>
+
+<!-- ── Combined Savings Staircase ───────────────────────────────────────── -->
+<h2>Combined Savings Staircase &mdash; Compound Token Reduction</h2>
+<div class="charts2">
+  <div class="cw" style="grid-column:1/-1"><canvas id="staircaseBar" style="max-height:320px"></canvas></div>
+</div>
+<div class="sect">
+<table>
+<thead><tr>
+  <th>Layer</th><th>Technique</th><th>Status</th>
+  <th>Tokens Remaining</th><th>Tokens Saved (layer)</th><th>Cumulative TER</th><th>Notes</th>
+</tr></thead>
+<tbody id="staircase-tbody"></tbody>
+</table>
+<p class="note">
+  Layers compound multiplicatively &mdash; each reduction applies to what remains after the previous stage.
+  RAG and Cache estimates are theoretical; actual savings depend on query specificity and prompt reuse rate.
+  Layers marked <span style="color:var(--yw)">&#x26A0; Planned</span> are not yet wired into the pipeline.
+</p>
+</div>
+
+<!-- ── ROI Calculator ────────────────────────────────────────────────────── -->
+<h2>ROI Calculator</h2>
+<div class="calc">
+  <h3>Adjust assumptions to model your scenario</h3>
+  <div class="calc-grid">
+    <div class="field">
+      <label>Avg tokens per request (uncompressed)</label>
+      <input type="number" id="c_tokens" value="17886" min="100" step="100">
+    </div>
+    <div class="field">
+      <label>Requests per day</label>
+      <input type="number" id="c_reqs" value="1000" min="1" step="100">
+    </div>
+    <div class="field">
+      <label>LLM Tier / pricing</label>
+      <select id="c_tier">
+        <option value="0.00025">T1 &mdash; Haiku ($0.00025 / 1K tok)</option>
+        <option value="0.003" selected>T2 &mdash; Sonnet ($0.003 / 1K tok)</option>
+        <option value="0.015">T3 &mdash; Opus ($0.015 / 1K tok)</option>
+        <option value="0.00001">Custom &mdash; edit price below</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Custom price ($/1K input tokens)</label>
+      <input type="number" id="c_price" value="0.003" min="0.00001" step="0.0001">
+    </div>
+    <div class="field">
+      <label>TER achieved (%)</label>
+      <input type="number" id="c_ter" value="54.4" min="0" max="99" step="0.5">
+    </div>
+    <div class="field">
+      <label>Working days per year</label>
+      <input type="number" id="c_days" value="365" min="1" max="365">
+    </div>
+  </div>
+  <div class="calc-out">
+    <div class="calc-card"><div class="cv" id="r_daily">$0</div><div class="cl">Daily savings</div></div>
+    <div class="calc-card"><div class="cv" id="r_monthly">$0</div><div class="cl">Monthly savings (30d)</div></div>
+    <div class="calc-card"><div class="cv" id="r_annual">$0</div><div class="cl">Annual savings</div></div>
+    <div class="calc-card"><div class="cv" id="r_roi">0%</div><div class="cl">Input token reduction</div></div>
+  </div>
+</div>
+
+<!-- ── Per-Chunk Breakdown ───────────────────────────────────────────────── -->
+<h2>Per-Chunk Breakdown</h2>
+<div class="charts2">
+  <div class="cw"><canvas id="fnTokens"></canvas></div>
+  <div class="cw"><canvas id="fnPi"></canvas></div>
+</div>
+<div class="sect">
+<table>
+<thead><tr>
+  <th>Chunk</th><th>Lines</th><th>PI</th><th>Zone</th>
+  <th>Orig Tok</th><th>Final Tok</th><th>Saved</th><th>TER</th><th>Action</th>
+</tr></thead>
+<tbody><tr><td>__header__</td><td>112</td><td>1.000</td><td><span class='zone zone-hdr'>HEADER</span></td><td>469</td><td>390</td><td class='saved'>+79</td><td>16.8%</td><td></td></tr>
+<tr><td>P_RecursiveSound</td><td>45</td><td>0.540</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>219</td><td>26</td><td class='saved'>+193</td><td>88.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_NoiseAlert</td><td>9</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>34</td><td>26</td><td class='saved'>+8</td><td>23.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_WakeUpThing</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>71</td><td>28</td><td class='saved'>+43</td><td>60.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_DoPunchAlert</td><td>46</td><td>0.420</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>310</td><td>26</td><td class='saved'>+284</td><td>91.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_CheckMeleeRange</td><td>22</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>117</td><td>117</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>P_CheckMissileRange</td><td>63</td><td>0.360</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>338</td><td>296</td><td class='saved'>+42</td><td>12.4%</td><td></td></tr>
+<tr><td>P_CheckRobotRange</td><td>15</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>82</td><td>22</td><td class='saved'>+60</td><td>73.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_Move</td><td>71</td><td>0.540</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>347</td><td>333</td><td class='saved'>+14</td><td>4.0%</td><td></td></tr>
+<tr><td>P_TryWalk</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>36</td><td>36</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>P_NewChaseDir</td><td>277</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>1,288</td><td>346</td><td class='saved'>+942</td><td>73.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_NewRandomDir</td><td>78</td><td>0.420</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>348</td><td>22</td><td class='saved'>+326</td><td>93.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_LookForPlayers</td><td>1600</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>8,340</td><td>3,757</td><td class='saved'>+4,583</td><td>55.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Look</td><td>890</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>4,563</td><td>1,961</td><td class='saved'>+2,602</td><td>57.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_RandomWalk</td><td>32</td><td>0.640</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>153</td><td>22</td><td class='saved'>+131</td><td>85.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FriendLook</td><td>44</td><td>0.540</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>270</td><td>22</td><td class='saved'>+248</td><td>91.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Listen</td><td>26</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>137</td><td>22</td><td class='saved'>+115</td><td>83.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Chase</td><td>114</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>565</td><td>538</td><td class='saved'>+27</td><td>4.8%</td><td></td></tr>
+<tr><td>A_FaceTarget</td><td>25</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>143</td><td>22</td><td class='saved'>+121</td><td>84.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_PeasantPunch</td><td>9</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>53</td><td>22</td><td class='saved'>+31</td><td>58.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ReaverAttack</td><td>24</td><td>0.680</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>126</td><td>22</td><td class='saved'>+104</td><td>82.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BulletAttack</td><td>19</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>112</td><td>22</td><td class='saved'>+90</td><td>80.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CheckTargetVisible</td><td>15</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>70</td><td>22</td><td class='saved'>+48</td><td>68.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SentinelAttack</td><td>31</td><td>0.640</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>218</td><td>22</td><td class='saved'>+196</td><td>89.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_StalkerThink</td><td>15</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>60</td><td>22</td><td class='saved'>+38</td><td>63.3%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_StalkerSetLook</td><td>22</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>88</td><td>22</td><td class='saved'>+66</td><td>75.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_StalkerDrop</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>16</td><td>16</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_StalkerScratch</td><td>16</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>82</td><td>22</td><td class='saved'>+60</td><td>73.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FloatWeave</td><td>27</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>126</td><td>22</td><td class='saved'>+104</td><td>82.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_RobotMelee</td><td>12</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>62</td><td>22</td><td class='saved'>+40</td><td>64.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_TemplarMauler</td><td>27</td><td>0.640</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>169</td><td>22</td><td class='saved'>+147</td><td>87.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CrusaderAttack</td><td>34</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>191</td><td>22</td><td class='saved'>+169</td><td>88.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CrusaderLeft</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>52</td><td>22</td><td class='saved'>+30</td><td>57.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CrusaderRight</td><td>9</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>52</td><td>22</td><td class='saved'>+30</td><td>57.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CheckTargetVisible2</td><td>8</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>47</td><td>22</td><td class='saved'>+25</td><td>53.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqFlyCheck</td><td>18</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>97</td><td>22</td><td class='saved'>+75</td><td>77.3%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqGrenade</td><td>23</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>113</td><td>22</td><td class='saved'>+91</td><td>80.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqTakeOff</td><td>31</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>169</td><td>22</td><td class='saved'>+147</td><td>87.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqFly</td><td>14</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>88</td><td>22</td><td class='saved'>+66</td><td>75.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ProgrammerAttack</td><td>14</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>71</td><td>22</td><td class='saved'>+49</td><td>69.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Sigil_A_Action</td><td>33</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>255</td><td>22</td><td class='saved'>+233</td><td>91.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpectreEAttack</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpectreCAttack</td><td>24</td><td>0.640</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>149</td><td>22</td><td class='saved'>+127</td><td>85.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_AlertSpectreC</td><td>19</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>92</td><td>22</td><td class='saved'>+70</td><td>76.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Sigil_E_Action</td><td>12</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>48</td><td>22</td><td class='saved'>+26</td><td>54.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SigilTrail</td><td>12</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>56</td><td>22</td><td class='saved'>+34</td><td>60.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpectreDAttack</td><td>11</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>50</td><td>22</td><td class='saved'>+28</td><td>56.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FireSigilEOffshoot</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ShadowOff</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>20</td><td>20</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_ModifyVisibility</td><td>5</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>22</td><td>22</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_ShadowOn</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>19</td><td>19</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_SetTLOptions</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>43</td><td>22</td><td class='saved'>+21</td><td>48.8%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BossMeleeAtk</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>39</td><td>22</td><td class='saved'>+17</td><td>43.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BishopAttack</td><td>14</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>57</td><td>22</td><td class='saved'>+35</td><td>61.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FireHookShot</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>29</td><td>22</td><td class='saved'>+7</td><td>24.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FireChainShot</td><td>14</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>96</td><td>22</td><td class='saved'>+74</td><td>77.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_MissileSmoke</td><td>12</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>68</td><td>22</td><td class='saved'>+46</td><td>67.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSparkPuff</td><td>16</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>120</td><td>22</td><td class='saved'>+98</td><td>81.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Tracer</td><td>55</td><td>0.700</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>306</td><td>22</td><td class='saved'>+284</td><td>92.8%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ProgrammerMelee</td><td>15</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>67</td><td>22</td><td class='saved'>+45</td><td>67.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Scream</td><td>11</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>68</td><td>22</td><td class='saved'>+46</td><td>67.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_XScream</td><td>11</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>48</td><td>22</td><td class='saved'>+26</td><td>54.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Pain</td><td>12</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>54</td><td>22</td><td class='saved'>+32</td><td>59.3%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_PeasantCrash</td><td>770</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>4,523</td><td>2,469</td><td class='saved'>+2,054</td><td>45.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_Fall</td><td>9</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>63</td><td>22</td><td class='saved'>+41</td><td>65.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_HideZombie</td><td>10</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>51</td><td>22</td><td class='saved'>+29</td><td>56.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_MerchantPain</td><td>10</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>51</td><td>22</td><td class='saved'>+29</td><td>56.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ProgrammerDie</td><td>17</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>110</td><td>22</td><td class='saved'>+88</td><td>80.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqTossArm</td><td>16</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>103</td><td>22</td><td class='saved'>+81</td><td>78.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSpectreA</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSpectreB</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSpectreC</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSpectreD</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnSpectreE</td><td>7</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>42</td><td>22</td><td class='saved'>+20</td><td>47.6%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnEntity</td><td>11</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>62</td><td>22</td><td class='saved'>+40</td><td>64.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_ThrustMobj</td><td>6</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>52</td><td>28</td><td class='saved'>+24</td><td>46.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_EntityDeath</td><td>35</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>271</td><td>22</td><td class='saved'>+249</td><td>91.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnZombie</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>26</td><td>26</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_ZombieInSpecialSector</td><td>21</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>115</td><td>22</td><td class='saved'>+93</td><td>80.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CrystalExplode</td><td>22</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>167</td><td>22</td><td class='saved'>+145</td><td>86.8%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_FreePrisoners</td><td>12</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>63</td><td>20</td><td class='saved'>+43</td><td>68.3%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>P_DestroyConverter</td><td>14</td><td>0.740</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>89</td><td>20</td><td class='saved'>+69</td><td>77.5%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_QuestMsg</td><td>18</td><td>0.680</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>121</td><td>22</td><td class='saved'>+99</td><td>81.8%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ExtraLightOff</td><td>10</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>40</td><td>22</td><td class='saved'>+18</td><td>45.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_CrystalRadiusAtk</td><td>10</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>59</td><td>22</td><td class='saved'>+37</td><td>62.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_DeathExplode5</td><td>6</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>45</td><td>22</td><td class='saved'>+23</td><td>51.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_DeathExplode1</td><td>6</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>45</td><td>22</td><td class='saved'>+23</td><td>51.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_DeathExplode2</td><td>6</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>45</td><td>22</td><td class='saved'>+23</td><td>51.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_DeathExplode3</td><td>6</td><td>0.790</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>45</td><td>22</td><td class='saved'>+23</td><td>51.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_RaiseAlarm</td><td>5</td><td>0.840</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>34</td><td>34</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_MissileTick</td><td>8</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>33</td><td>22</td><td class='saved'>+11</td><td>33.3%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_SpawnGrenadeFire</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>26</td><td>26</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_NodeChunk</td><td>12</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>112</td><td>22</td><td class='saved'>+90</td><td>80.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_HeadChunk</td><td>12</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>111</td><td>22</td><td class='saved'>+89</td><td>80.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BurnSpread</td><td>34</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>270</td><td>22</td><td class='saved'>+248</td><td>91.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BossDeath</td><td>232</td><td>0.300</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>1,279</td><td>960</td><td class='saved'>+319</td><td>24.9%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_AcolyteSpecial</td><td>36</td><td>0.520</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>207</td><td>22</td><td class='saved'>+185</td><td>89.4%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_InqChase</td><td>5</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>21</td><td>21</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_StalkerChase</td><td>5</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>21</td><td>21</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_PlayerScream</td><td>81</td><td>0.540</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>446</td><td>57</td><td class='saved'>+389</td><td>87.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_TeleportBeacon</td><td>124</td><td>0.480</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>765</td><td>122</td><td class='saved'>+643</td><td>84.1%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_BodyParts</td><td>21</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>169</td><td>22</td><td class='saved'>+147</td><td>87.0%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ActiveSound</td><td>8</td><td>0.850</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>47</td><td>22</td><td class='saved'>+25</td><td>53.2%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_ClearSoundTarget</td><td>4</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>21</td><td>21</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_DropBurnFlesh</td><td>14</td><td>0.800</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>75</td><td>22</td><td class='saved'>+53</td><td>70.7%</td><td><span class="badge">SKEL</span></td></tr>
+<tr><td>A_FlameDeath</td><td>5</td><td>0.900</td><td><span class='zone zone-bg'>BACKGROUND</span></td><td>29</td><td>29</td><td class=''>0</td><td>0.0%</td><td></td></tr>
+<tr><td>A_ClearForceField</td><td>27</td><td>0.640</td><td><span class='zone zone-fg'>FOREGROUND</span></td><td>156</td><td>22</td><td class='saved'>+134</td><td>85.9%</td><td><span class="badge">SKEL</span></td></tr>
+</tbody>
+</table>
+<p class="note">
+  Zone legend: <span class="zone zone-bg">BACKGROUND</span> = PI &ge; 0.70 (short, loop-free &rarr; skeletonizable) &nbsp;
+  <span class="zone zone-fg">FOREGROUND</span> = PI &lt; 0.70 (complex, kept full) &nbsp;
+  <span class="zone zone-hdr">HEADER</span> = file preamble (#includes, #defines).
+  Per-chunk token sums may exceed whole-file count when regex parser yields overlapping ranges
+  (nested function-like constructs in large functions). Whole-file counts in the KPI cards are authoritative.
+</p>
+</div>
+
+<!-- ── Quality Gate ──────────────────────────────────────────────────────── -->
+<h2>Quality Gate</h2>
+<div class="card">
+  <div class="tv">
+    <div>
+      <div class="tv-v" style="color:#d29922">54.4%</div>
+      <div class="tv-l">TER &mdash; target &gt;80%</div>
+    </div>
+    <div>
+      <div class="tv-v" style="color:#d29922">0.731</div>
+      <div class="tv-l">RQS-L1 &mdash; &ge;0.85 to pass</div>
+    </div>
+    <div>
+      <div class="tv-v" style="color:var(--ac)">0.3977</div>
+      <div class="tv-l">True Value = TER &times; RQS</div>
+    </div>
+    <div>
+      <div class="tv-v" style="color:#d29922">WARN ⚠</div>
+      <div class="tv-l">Quality verdict</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Question Filter (KISS RAG) ───────────────────────────────────────── -->
+<h2>Question Filter &mdash; KISS RAG</h2>
+<div class="card" style="color:var(--mt);font-size:.87rem">
+  No question provided &mdash; pass <code>--question</code> to enable BM25 chunk filtering.
+  <br>Example: <code>python kloc.py report-c --file game.c --repo . --question "how does sound propagation work?"</code>
+</div>
+
+<script>
+Chart.defaults.color='#8b949e';
+Chart.defaults.borderColor='#30363d';
+const G={color:'rgba(48,54,61,.65)'};
+
+// Stage waterfall
+new Chart('stageBar',{type:'bar',data:{
+  labels:["Original", "After F1 Skeleton", "After F3 Masking", "After F4 Caveman"],
+  datasets:[{label:'Tokens',data:[17886, 9056, 9042, 8153],
+    backgroundColor:['rgba(110,118,129,.75)','rgba(88,166,255,.85)','rgba(63,185,80,.85)','rgba(210,153,34,.85)'],
+    borderRadius:5}]
+},options:{
+  plugins:{title:{display:true,text:'Token count at each compression stage',color:'#e6edf3',font:{size:12}},legend:{display:false}},
+  scales:{y:{grid:G,title:{display:true,text:'tokens',color:'#8b949e'}},x:{grid:{display:false}}}
+}});
+
+// Savings doughnut
+new Chart('savingsDoughnut',{type:'doughnut',data:{
+  labels:['F1 Skeleton (49.4%)','F3 Masking (0.1%)','F4 Caveman (6.4%)','Remaining'],
+  datasets:[{data:[8830,14,889,8153],
+    backgroundColor:['rgba(88,166,255,.85)','rgba(63,185,80,.85)','rgba(210,153,34,.85)','rgba(110,118,129,.4)'],
+    borderWidth:1,borderColor:'#30363d'}]
+},options:{
+  plugins:{title:{display:true,text:'Token savings by algorithm',color:'#e6edf3',font:{size:12}},
+    legend:{position:'right',labels:{boxWidth:11,font:{size:11}}}},cutout:'58%'
+}});
+
+// Toggle bar (dual axis)
+new Chart('algoBar',{type:'bar',data:{
+  labels:["None", "F4 only", "F3 only", "F1 only", "F1+F3", "F1+F3+F4"],
+  datasets:[
+    {label:'Tokens',data:[17886, 16743, 17872, 9056, 9042, 8153],backgroundColor:'rgba(88,166,255,.7)',borderRadius:4,yAxisID:'y'},
+    {label:'TER %',data:[0.0, 6.4, 0.1, 49.4, 49.4, 54.4],backgroundColor:'rgba(63,185,80,.6)',borderRadius:4,yAxisID:'y2'}
+  ]
+},options:{
+  plugins:{title:{display:true,text:'Token count & TER by config',color:'#e6edf3',font:{size:12}}},
+  scales:{
+    y:{grid:G,title:{display:true,text:'tokens',color:'#8b949e'}},
+    y2:{position:'right',title:{display:true,text:'TER %',color:'#8b949e'},grid:{display:false}},
+    x:{grid:{display:false}}
+  }
+}});
+
+// Quality / TER tradeoff line
+new Chart('qualityLine',{type:'line',data:{
+  labels:["None", "F4 only", "F3 only", "F1 only", "F1+F3", "F1+F3+F4"],
+  datasets:[
+    {label:'RQS-L1 (quality)',data:[1.0, 0.969, 1.0, 0.794, 0.794, 0.731],borderColor:'#3fb950',
+     backgroundColor:'rgba(63,185,80,.1)',tension:.3,fill:true,pointRadius:5},
+    {label:'TER/100 (compression)',data:[0.0, 0.064, 0.001, 0.494, 0.494, 0.544],
+     borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.1)',tension:.3,fill:true,pointRadius:5}
+  ]
+},options:{
+  plugins:{title:{display:true,text:'Quality vs compression trade-off per config',color:'#e6edf3',font:{size:12}}},
+  scales:{y:{min:0,max:1.05,grid:G},x:{grid:{display:false}}}
+}});
+
+// Per-chunk token comparison
+new Chart('fnTokens',{type:'bar',data:{
+  labels:["__header__", "P_RecursiveSound", "P_NoiseAlert", "P_WakeUpThing", "P_DoPunchAlert", "P_CheckMeleeRange", "P_CheckMissileRange", "P_CheckRobotRange", "P_Move", "P_TryWalk", "P_NewChaseDir", "P_NewRandomDir", "P_LookForPlayers", "A_Look", "A_RandomWalk", "A_FriendLook", "A_Listen", "A_Chase", "A_FaceTarget", "A_PeasantPunch", "A_ReaverAttack", "A_BulletAttack", "A_CheckTargetVisible", "A_SentinelAttack", "A_StalkerThink", "A_StalkerSetLook", "A_StalkerDrop", "A_StalkerScratch", "A_FloatWeave", "A_RobotMelee", "A_TemplarMauler", "A_CrusaderAttack", "A_CrusaderLeft", "A_CrusaderRight", "A_CheckTargetVisible2", "A_InqFlyCheck", "A_InqGrenade", "A_InqTakeOff", "A_InqFly", "A_ProgrammerAttack", "A_Sigil_A_Action", "A_SpectreEAttack", "A_SpectreCAttack", "A_AlertSpectreC", "A_Sigil_E_Action", "A_SigilTrail", "A_SpectreDAttack", "A_FireSigilEOffshoot", "A_ShadowOff", "A_ModifyVisibility", "A_ShadowOn", "A_SetTLOptions", "A_BossMeleeAtk", "A_BishopAttack", "A_FireHookShot", "A_FireChainShot", "A_MissileSmoke", "A_SpawnSparkPuff", "A_Tracer", "A_ProgrammerMelee", "A_Scream", "A_XScream", "A_Pain", "A_PeasantCrash", "A_Fall", "A_HideZombie", "A_MerchantPain", "A_ProgrammerDie", "A_InqTossArm", "A_SpawnSpectreA", "A_SpawnSpectreB", "A_SpawnSpectreC", "A_SpawnSpectreD", "A_SpawnSpectreE", "A_SpawnEntity", "P_ThrustMobj", "A_EntityDeath", "A_SpawnZombie", "A_ZombieInSpecialSector", "A_CrystalExplode", "P_FreePrisoners", "P_DestroyConverter", "A_QuestMsg", "A_ExtraLightOff", "A_CrystalRadiusAtk", "A_DeathExplode5", "A_DeathExplode1", "A_DeathExplode2", "A_DeathExplode3", "A_RaiseAlarm", "A_MissileTick", "A_SpawnGrenadeFire", "A_NodeChunk", "A_HeadChunk", "A_BurnSpread", "A_BossDeath", "A_AcolyteSpecial", "A_InqChase", "A_StalkerChase", "A_PlayerScream", "A_TeleportBeacon", "A_BodyParts", "A_ActiveSound", "A_ClearSoundTarget", "A_DropBurnFlesh", "A_FlameDeath", "A_ClearForceField"],
+  datasets:[
+    {label:'Original',data:[469, 219, 34, 71, 310, 117, 338, 82, 347, 36, 1288, 348, 8340, 4563, 153, 270, 137, 565, 143, 53, 126, 112, 70, 218, 60, 88, 16, 82, 126, 62, 169, 191, 52, 52, 47, 97, 113, 169, 88, 71, 255, 42, 149, 92, 48, 56, 50, 42, 20, 22, 19, 43, 39, 57, 29, 96, 68, 120, 306, 67, 68, 48, 54, 4523, 63, 51, 51, 110, 103, 42, 42, 42, 42, 42, 62, 52, 271, 26, 115, 167, 63, 89, 121, 40, 59, 45, 45, 45, 45, 34, 33, 26, 112, 111, 270, 1279, 207, 21, 21, 446, 765, 169, 47, 21, 75, 29, 156],backgroundColor:'rgba(110,118,129,.55)',borderRadius:3},
+    {label:'Compressed',data:[390, 26, 26, 28, 26, 117, 296, 22, 333, 36, 346, 22, 3757, 1961, 22, 22, 22, 538, 22, 22, 22, 22, 22, 22, 22, 22, 16, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 20, 22, 19, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 2469, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 28, 22, 26, 22, 22, 20, 20, 22, 22, 22, 22, 22, 22, 22, 34, 22, 26, 22, 22, 22, 960, 22, 21, 21, 57, 122, 22, 22, 21, 22, 29, 22],backgroundColor:'rgba(88,166,255,.8)',borderRadius:3}
+  ]
+},options:{
+  plugins:{title:{display:true,text:'Per-chunk: original vs compressed tokens',color:'#e6edf3',font:{size:12}}},
+  scales:{y:{grid:G},x:{grid:{display:false},ticks:{maxRotation:55,font:{size:9}}}}
+}});
+
+// PI score per chunk
+new Chart('fnPi',{type:'bar',data:{
+  labels:["__header__", "P_RecursiveSound", "P_NoiseAlert", "P_WakeUpThing", "P_DoPunchAlert", "P_CheckMeleeRange", "P_CheckMissileRange", "P_CheckRobotRange", "P_Move", "P_TryWalk", "P_NewChaseDir", "P_NewRandomDir", "P_LookForPlayers", "A_Look", "A_RandomWalk", "A_FriendLook", "A_Listen", "A_Chase", "A_FaceTarget", "A_PeasantPunch", "A_ReaverAttack", "A_BulletAttack", "A_CheckTargetVisible", "A_SentinelAttack", "A_StalkerThink", "A_StalkerSetLook", "A_StalkerDrop", "A_StalkerScratch", "A_FloatWeave", "A_RobotMelee", "A_TemplarMauler", "A_CrusaderAttack", "A_CrusaderLeft", "A_CrusaderRight", "A_CheckTargetVisible2", "A_InqFlyCheck", "A_InqGrenade", "A_InqTakeOff", "A_InqFly", "A_ProgrammerAttack", "A_Sigil_A_Action", "A_SpectreEAttack", "A_SpectreCAttack", "A_AlertSpectreC", "A_Sigil_E_Action", "A_SigilTrail", "A_SpectreDAttack", "A_FireSigilEOffshoot", "A_ShadowOff", "A_ModifyVisibility", "A_ShadowOn", "A_SetTLOptions", "A_BossMeleeAtk", "A_BishopAttack", "A_FireHookShot", "A_FireChainShot", "A_MissileSmoke", "A_SpawnSparkPuff", "A_Tracer", "A_ProgrammerMelee", "A_Scream", "A_XScream", "A_Pain", "A_PeasantCrash", "A_Fall", "A_HideZombie", "A_MerchantPain", "A_ProgrammerDie", "A_InqTossArm", "A_SpawnSpectreA", "A_SpawnSpectreB", "A_SpawnSpectreC", "A_SpawnSpectreD", "A_SpawnSpectreE", "A_SpawnEntity", "P_ThrustMobj", "A_EntityDeath", "A_SpawnZombie", "A_ZombieInSpecialSector", "A_CrystalExplode", "P_FreePrisoners", "P_DestroyConverter", "A_QuestMsg", "A_ExtraLightOff", "A_CrystalRadiusAtk", "A_DeathExplode5", "A_DeathExplode1", "A_DeathExplode2", "A_DeathExplode3", "A_RaiseAlarm", "A_MissileTick", "A_SpawnGrenadeFire", "A_NodeChunk", "A_HeadChunk", "A_BurnSpread", "A_BossDeath", "A_AcolyteSpecial", "A_InqChase", "A_StalkerChase", "A_PlayerScream", "A_TeleportBeacon", "A_BodyParts", "A_ActiveSound", "A_ClearSoundTarget", "A_DropBurnFlesh", "A_FlameDeath", "A_ClearForceField"],
+  datasets:[{label:'PI Score',data:[1.0, 0.54, 0.85, 0.85, 0.42, 0.8, 0.36, 0.74, 0.54, 0.85, 0.3, 0.42, 0.3, 0.3, 0.64, 0.54, 0.8, 0.3, 0.8, 0.85, 0.68, 0.8, 0.8, 0.64, 0.8, 0.8, 0.9, 0.8, 0.8, 0.8, 0.64, 0.8, 0.85, 0.85, 0.85, 0.8, 0.8, 0.8, 0.74, 0.8, 0.8, 0.85, 0.64, 0.74, 0.85, 0.85, 0.85, 0.85, 0.9, 0.9, 0.9, 0.85, 0.85, 0.85, 0.85, 0.8, 0.85, 0.8, 0.7, 0.8, 0.79, 0.85, 0.85, 0.3, 0.85, 0.79, 0.79, 0.74, 0.74, 0.85, 0.85, 0.85, 0.85, 0.85, 0.85, 0.85, 0.8, 0.9, 0.74, 0.74, 0.79, 0.74, 0.68, 0.85, 0.79, 0.79, 0.79, 0.79, 0.79, 0.84, 0.85, 0.9, 0.8, 0.8, 0.8, 0.3, 0.52, 0.9, 0.9, 0.54, 0.48, 0.8, 0.85, 0.9, 0.8, 0.9, 0.64],
+    backgroundColor:[1.0, 0.54, 0.85, 0.85, 0.42, 0.8, 0.36, 0.74, 0.54, 0.85, 0.3, 0.42, 0.3, 0.3, 0.64, 0.54, 0.8, 0.3, 0.8, 0.85, 0.68, 0.8, 0.8, 0.64, 0.8, 0.8, 0.9, 0.8, 0.8, 0.8, 0.64, 0.8, 0.85, 0.85, 0.85, 0.8, 0.8, 0.8, 0.74, 0.8, 0.8, 0.85, 0.64, 0.74, 0.85, 0.85, 0.85, 0.85, 0.9, 0.9, 0.9, 0.85, 0.85, 0.85, 0.85, 0.8, 0.85, 0.8, 0.7, 0.8, 0.79, 0.85, 0.85, 0.3, 0.85, 0.79, 0.79, 0.74, 0.74, 0.85, 0.85, 0.85, 0.85, 0.85, 0.85, 0.85, 0.8, 0.9, 0.74, 0.74, 0.79, 0.74, 0.68, 0.85, 0.79, 0.79, 0.79, 0.79, 0.79, 0.84, 0.85, 0.9, 0.8, 0.8, 0.8, 0.3, 0.52, 0.9, 0.9, 0.54, 0.48, 0.8, 0.85, 0.9, 0.8, 0.9, 0.64].map(p=>p>=0.70?'rgba(63,185,80,.8)':'rgba(248,81,73,.75)'),
+    borderRadius:3}]
+},options:{
+  plugins:{title:{display:true,text:'Predictability Index (≥ 0.70 = skeletonizable)',color:'#e6edf3',font:{size:12}},legend:{display:false}},
+  scales:{y:{min:0,max:1.05,grid:G},x:{grid:{display:false},ticks:{maxRotation:55,font:{size:9}}}}
+}});
+
+// Combined Savings Staircase
+(function(){
+  const orig = 17886;
+  const layers = [
+    {name:'Original',            tech:'Uncompressed baseline',                   status:'baseline', ter:0},
+    {name:'F1 Skeleton',         tech:'Predictable fn bodies → placeholder',      status:'live',    ter:49.4},
+    {name:'F3 Include Masking',  tech:'KQ #include/#define → [§:hash]',           status:'live',    ter:49.4},
+    {name:'F4 Caveman',          tech:'Stop-word strip in // and /* */ comments', status:'live',    ter:54.4},
+    {name:'RAG Retrieval',       tech:'Send only relevant chunks via Qdrant',     status:'planned', ter_add:70},
+    {name:'Context Caching',     tech:'Provider prefix cache (Anthropic/OpenAI)', status:'planned', ter_add:60},
+    {name:'Semantic Compress.',  tech:'LLMLingua-style small-model rewrite',      status:'planned', ter_add:40},
+  ];
+
+  // Compute cumulative compounding
+  let remaining = orig;
+  const rows = [];
+  layers.forEach((L,i) => {
+    let saved = 0;
+    if(i === 0) {
+      rows.push({...L, remaining: orig, saved: 0, cumTER: 0});
+      return;
+    }
+    if(L.ter !== undefined) {
+      // live layer — use actual whole-file TER
+      const newRem = Math.round(orig * (1 - L.ter/100));
+      saved = remaining - newRem;
+      remaining = newRem;
+    } else {
+      // planned layer — compound reduction on what's left
+      saved = Math.round(remaining * L.ter_add / 100);
+      remaining = remaining - saved;
+    }
+    const cumTER = Math.round((1 - remaining/orig)*100*10)/10;
+    rows.push({...L, remaining, saved, cumTER});
+  });
+
+  // Build table
+  const tbody = document.getElementById('staircase-tbody');
+  rows.forEach(r => {
+    const statusBadge = r.status === 'live'
+      ? `<span style="color:var(--gr);font-weight:700">&#x2714; Live</span>`
+      : r.status === 'baseline'
+      ? `<span style="color:var(--mt)">&#x2014;</span>`
+      : `<span style="color:var(--yw);font-weight:700">&#x26A0; Planned</span>`;
+    const savCls = r.saved > 0 ? 'saved' : '';
+    const savStr = r.saved > 0 ? '+'+r.saved.toLocaleString() : '&mdash;';
+    tbody.innerHTML += `<tr>
+      <td><strong>${r.name}</strong></td>
+      <td class="mono">${r.tech}</td>
+      <td>${statusBadge}</td>
+      <td>${r.remaining.toLocaleString()}</td>
+      <td class="${savCls}">${savStr}</td>
+      <td class="${r.cumTER>0?'saved':''}">${r.cumTER > 0 ? r.cumTER.toFixed(1)+'%' : '0.0%'}</td>
+      <td class="mono">${r.ter !== undefined ? 'measured on this file' : 'estimated ~'+r.ter_add+'% of remaining'}</td>
+    </tr>`;
+  });
+
+  // Bar chart
+  const labels = rows.map(r=>r.name);
+  const rems   = rows.map(r=>r.remaining);
+  const colors = rows.map(r=>
+    r.status==='baseline'  ? 'rgba(110,118,129,.7)' :
+    r.status==='live'      ? 'rgba(88,166,255,.85)' :
+                             'rgba(210,153,34,.6)'
+  );
+  new Chart('staircaseBar',{type:'bar',data:{
+    labels,
+    datasets:[{
+      label:'Tokens remaining',
+      data:rems,
+      backgroundColor:colors,
+      borderRadius:5
+    }]
+  },options:{
+    plugins:{
+      title:{display:true,text:'Compound token reduction across all layers (blue=live, amber=planned)',color:'#e6edf3',font:{size:13}},
+      legend:{display:false}
+    },
+    scales:{
+      y:{grid:G,title:{display:true,text:'tokens remaining',color:'#8b949e'}},
+      x:{grid:{display:false}}
+    }
+  }});
+})();
+
+// ROI Calculator
+const tier = document.getElementById('c_tier');
+const price = document.getElementById('c_price');
+tier.addEventListener('change',()=>{
+  const v=parseFloat(tier.value);
+  if(!isNaN(v)&&v>0) price.value=v.toFixed(6);
+});
+function calcROI(){
+  const tok  = parseFloat(document.getElementById('c_tokens').value)||0;
+  const reqs = parseFloat(document.getElementById('c_reqs').value)||0;
+  const pr   = parseFloat(price.value)||0;
+  const ter  = parseFloat(document.getElementById('c_ter').value)||0;
+  const days = parseFloat(document.getElementById('c_days').value)||365;
+  const comp = tok*(1-ter/100);
+  const daily= (tok-comp)*reqs*pr/1000;
+  const mo   = daily*30;
+  const yr   = daily*days;
+  const fmt  = v=>v>=1000?'$'+v.toFixed(0).replace(/[\B](?=([\d]{3})+(?![\d]))/g,',')
+                         :v>=1?'$'+v.toFixed(2):'$'+v.toFixed(4);
+  document.getElementById('r_daily').textContent  =fmt(daily);
+  document.getElementById('r_monthly').textContent=fmt(mo);
+  document.getElementById('r_annual').textContent =fmt(yr);
+  document.getElementById('r_roi').textContent    =ter.toFixed(1)+'%';
+}
+['c_tokens','c_reqs','c_tier','c_price','c_ter','c_days']
+  .forEach(id=>document.getElementById(id).addEventListener('input',calcROI));
+calcROI();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "_doc": "C_PI scoring constants — controls which C functions get skeletonized",
+  "_env_prefix": "KLOC_CPI",
+  "threshold": {
+    "env": "KLOC_CPI_THRESHOLD",
+    "default": 0.70,
+    "type": "float",
+    "range": [0.50, 0.95],
+    "doc": "C_PI >= threshold → C function body is replaced with skeleton."
+  },
+  "complexity_penalty_multiplier": {
+    "env": "KLOC_CPI_COMPLEXITY_PENALTY",
+    "default": 0.06,
+    "type": "float",
+    "range": [0.02, 0.15],
+    "doc": "Points deducted per complex C keyword (for/while/do/switch/goto)."
+  },
+  "complexity_penalty_cap": {
+    "env": "KLOC_CPI_COMPLEXITY_CAP",
+    "default": 0.30,
+    "type": "float",
+    "range": [0.10, 0.50],
+    "doc": "Maximum total C complexity penalty."
+  },
+  "boilerplate_bonus": {
+    "env": "KLOC_CPI_BOILERPLATE_BONUS",
+    "default": 0.15,
+    "type": "float",
+    "range": [0.0, 0.30],
+    "doc": "Bonus when >50% simple lines AND zero complex keywords."
+  },
+  "loop_free_bonus": {
+    "env": "KLOC_CPI_LOOP_FREE_BONUS",
+    "default": 0.10,
+    "type": "float",
+    "range": [0.0, 0.20],
+    "doc": "Bonus for >20 lines with zero complex keywords."
+  },
+  "min_body_lines": {
+    "env": "KLOC_CPI_MIN_BODY_LINES",
+    "default": 3,
+    "type": "int",
+    "range": [1, 10],
+    "doc": "Don't skeletonize function bodies shorter than this."
+  }
+}

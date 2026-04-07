@@ -1,0 +1,40 @@
+{
+  "_comment": "Inference-Bridge (InB) runtime configuration. Edit freely.",
+
+  "pi_threshold": 0.70,
+  "entropy_threshold": 4.0,
+  "known_quantity_min_freq": 3,
+  "hzs_cold_cutoff": 0.05,
+  "hzs_lambda": 0.1,
+  "n_commits": 1,
+  "vowel_prune_min_len": 5,
+
+  "features": {
+    "masking":  true,
+    "delta":    true,
+    "skeleton": true,
+    "caveman":  true
+  },
+
+  "registry_path": "inb_registry.json",
+
+  "target_extensions": [".py"],
+
+  "test_repos": {
+    "flask":   "https://github.com/pallets/flask.git",
+    "click":   "https://github.com/pallets/click.git",
+    "bottle":  "https://github.com/bottlepy/bottle.git",
+    "httpx":   "https://github.com/encode/httpx.git",
+    "rich":    "https://github.com/Textualize/rich.git",
+    "fastapi": "https://github.com/tiangolo/fastapi.git"
+  },
+
+  "clone_dir": "./test_repos",
+  "clone_depth": 5,
+
+  "benchmark": {
+    "max_files_per_repo": 50,
+    "random_seed": 42,
+    "output_dir": "./benchmark_results"
+  }
+}

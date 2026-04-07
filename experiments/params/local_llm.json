@@ -1,0 +1,46 @@
+{
+  "_doc": "Local LLM T0.5 tier parameters — controls routing quality, context, and inference",
+  "_env_prefix": "KLOC_LOCAL_LLM",
+  "max_ctx": {
+    "env": "KLOC_LOCAL_LLM_MAX_CTX",
+    "default": 8000,
+    "type": "int",
+    "range": [2000, 16000],
+    "doc": "Maximum word count of context sent to the local model. Higher = more complete but slower."
+  },
+  "quality_threshold": {
+    "env": "KLOC_LOCAL_LLM_QUALITY_THRESHOLD",
+    "default": 20,
+    "type": "int",
+    "range": [5, 50],
+    "doc": "Minimum response word count to pass the quality gate. Higher = stricter fallback to Anthropic."
+  },
+  "temperature": {
+    "env": "KLOC_LOCAL_LLM_TEMPERATURE",
+    "default": 0.1,
+    "type": "float",
+    "range": [0.0, 0.8],
+    "doc": "Ollama sampling temperature. 0.0 = deterministic, 0.8 = creative."
+  },
+  "rag_top_k": {
+    "env": "KLOC_LOCAL_LLM_RAG_TOP_K",
+    "default": 0,
+    "type": "int",
+    "range": [0, 10],
+    "doc": "BM25 RAG chunks prepended to local LLM context. 0 = disabled."
+  },
+  "two_stage": {
+    "env": "KLOC_LOCAL_LLM_TWO_STAGE",
+    "default": "0",
+    "type": "flag",
+    "values": ["0", "1"],
+    "doc": "Two-stage mode: Anthropic plan + local execution for refactor/codegen tasks."
+  },
+  "model": {
+    "env": "KLOC_LLM_MODEL",
+    "default": "qwen2.5-coder:14b",
+    "type": "string",
+    "values": ["qwen2.5-coder:7b", "qwen2.5-coder:14b"],
+    "doc": "Ollama model to use for T0.5 inference. 7b is ~2x faster, 14b has higher RQS-LLM."
+  }
+}

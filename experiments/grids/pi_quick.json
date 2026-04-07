@@ -1,0 +1,5 @@
+{
+  "_doc": "Quick PI threshold sweep — 5 values, ~15s total at 4 workers",
+  "KLOC_PI_THRESHOLD": [0.60, 0.65, 0.70, 0.75, 0.80],
+  "KLOC_PI_BOILERPLATE_BONUS": [0.15, 0.20]
+}

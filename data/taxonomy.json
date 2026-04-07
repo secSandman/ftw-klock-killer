@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Master taxonomy for FTW-KLOC-KILLER agent slices. Every FeatureSlice MUST carry tags from this list.",
+    "maintained_by": "PRUNER agent on startup — validates and extends as new patterns emerge"
+  },
+  "categories": {
+    "code.classification": {
+      "description": "PRUNER: foreground/background SDR classification",
+      "tags": ["code.classification", "sdr.foreground", "sdr.background", "hot_zone", "cold_zone", "predictability"]
+    },
+    "compression": {
+      "description": "GRUG: InferenceBridge compression stages",
+      "tags": ["compression.skeleton", "compression.masking", "compression.caveman", "compression.synonym", "ter", "rqs.l1", "intent_mapping"]
+    },
+    "routing": {
+      "description": "BALANCER: tier routing decisions",
+      "tags": ["routing.tier0", "routing.tier1", "routing.tier2", "routing.tier3", "cost.optimization", "adaptive.escalation", "quality.floor"]
+    },
+    "state": {
+      "description": "ZIPPY: conversation compression and state management",
+      "tags": ["state.hardcoded", "history.compressed", "kolmogorov", "session.zip", "turn.pruned"]
+    },
+    "rag": {
+      "description": "RAG pipeline: chunking, hashing, embedding, retrieval",
+      "tags": ["rag.chunk", "rag.hash", "rag.embed", "rag.upsert", "rag.query", "rainbow.hit", "rainbow.miss"]
+    },
+    "language": {
+      "description": "Source language tags",
+      "tags": ["lang.python", "lang.c", "lang.go", "lang.rust", "lang.unknown"]
+    },
+    "quality": {
+      "description": "RQS quality measurement layers",
+      "tags": ["quality.l1.semantic", "quality.l2.functional", "quality.l3.judge", "quality.l4.regression", "quality.pass", "quality.fail"]
+    }
+  },
+  "all_valid_tags": [
+    "code.classification", "sdr.foreground", "sdr.background", "hot_zone", "cold_zone", "predictability",
+    "compression.skeleton", "compression.masking", "compression.caveman", "compression.synonym",
+    "ter", "rqs.l1", "intent_mapping",
+    "routing.tier0", "routing.tier1", "routing.tier2", "routing.tier3",
+    "cost.optimization", "adaptive.escalation", "quality.floor",
+    "state.hardcoded", "history.compressed", "kolmogorov", "session.zip", "turn.pruned",
+    "rag.chunk", "rag.hash", "rag.embed", "rag.upsert", "rag.query", "rainbow.hit", "rainbow.miss",
+    "lang.python", "lang.c", "lang.go", "lang.rust", "lang.unknown",
+    "quality.l1.semantic", "quality.l2.functional", "quality.l3.judge", "quality.l4.regression",
+    "quality.pass", "quality.fail"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "_doc": "BM25 + metadata retrieval field weights and scoring constants",
+  "_env_prefix": "KLOC_RAG",
+  "name_weight": {
+    "env": "KLOC_RAG_NAME_WEIGHT",
+    "default": 5.0,
+    "type": "float",
+    "range": [1.0, 20.0],
+    "doc": "BM25 multiplier for function name field. High = name match >> body match."
+  },
+  "summary_weight": {
+    "env": "KLOC_RAG_SUMMARY_WEIGHT",
+    "default": 3.0,
+    "type": "float",
+    "range": [1.0, 10.0],
+    "doc": "BM25 multiplier for T1 Haiku summary field (0 = disable)."
+  },
+  "callee_weight": {
+    "env": "KLOC_RAG_CALLEE_WEIGHT",
+    "default": 2.0,
+    "type": "float",
+    "range": [0.5, 8.0],
+    "doc": "BM25 multiplier for callee names field."
+  },
+  "signature_weight": {
+    "env": "KLOC_RAG_SIGNATURE_WEIGHT",
+    "default": 2.0,
+    "type": "float",
+    "range": [0.5, 8.0],
+    "doc": "BM25 multiplier for function signature field."
+  },
+  "body_weight": {
+    "env": "KLOC_RAG_BODY_WEIGHT",
+    "default": 1.0,
+    "type": "float",
+    "range": [0.1, 5.0],
+    "doc": "BM25 multiplier for function body text (baseline)."
+  },
+  "symbol_boost": {
+    "env": "KLOC_RAG_SYMBOL_BOOST",
+    "default": 4.0,
+    "type": "float",
+    "range": [0.0, 20.0],
+    "doc": "Additive score boost when query token exactly matches a known function name."
+  },
+  "chain_expand_k": {
+    "env": "KLOC_RAG_CHAIN_EXPAND_K",
+    "default": 2,
+    "type": "int",
+    "range": [0, 10],
+    "doc": "Extra result slots for call-chain expansion (callers/callees of top results)."
+  },
+  "large_fn_lines": {
+    "env": "KLOC_RAG_LARGE_FN_LINES",
+    "default": 100,
+    "type": "int",
+    "range": [20, 500],
+    "doc": "Functions above this line count get a div(log(lines)) size penalty."
+  },
+  "rrf_k": {
+    "env": "KLOC_RAG_RRF_K",
+    "default": 60,
+    "type": "int",
+    "range": [10, 120],
+    "doc": "RRF constant k in score = 1/(k+rank). Lower = top ranks matter more."
+  }
+}

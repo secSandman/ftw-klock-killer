@@ -1,0 +1,8 @@
+{
+  "_doc": "Quick local LLM parameter sweep — 12 experiments, context window vs quality threshold",
+  "_corpus": "synthetic",
+  "_real_llm": true,
+  "KLOC_LOCAL_LLM_MAX_CTX": [2000, 4000, 8000],
+  "KLOC_LOCAL_LLM_QUALITY_THRESHOLD": [10, 20, 40],
+  "KLOC_LOCAL_LLM_TEMPERATURE": [0.1]
+}

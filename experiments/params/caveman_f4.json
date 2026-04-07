@@ -1,0 +1,17 @@
+{
+  "_doc": "F4 CavernMasker / GRUG caveman compression constants",
+  "_env_prefix": "KLOC_F4",
+  "vowel_prune_min_len": {
+    "env": "KLOC_F4_VOWEL_PRUNE_MIN_LEN",
+    "default": 5,
+    "type": "int",
+    "range": [3, 10],
+    "doc": "Minimum word length (chars) before interior vowels are stripped. Lower = more aggressive."
+  },
+  "enable_vowel_strip": {
+    "env": "KLOC_F4_ENABLE_VOWEL_STRIP",
+    "default": true,
+    "type": "bool",
+    "doc": "Toggle vowel stripping entirely. False = F4 does nothing (baseline comparison)."
+  }
+}

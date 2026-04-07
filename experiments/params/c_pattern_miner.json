@@ -1,0 +1,46 @@
+{
+  "_doc": "C pattern miner constants — controls what gets mined as Known Quantity patterns",
+  "_env_prefix": "KLOC_CPM",
+  "kq_threshold": {
+    "env": "KLOC_CPM_KQ_THRESHOLD",
+    "default": 3,
+    "type": "int",
+    "range": [1, 10],
+    "doc": "Pattern must appear in this many files to qualify as KQ. Lower = more patterns mined."
+  },
+  "max_define_len": {
+    "env": "KLOC_CPM_MAX_DEFINE_LEN",
+    "default": 120,
+    "type": "int",
+    "range": [40, 300],
+    "doc": "Skip #define macros longer than this (avoids masking function-like macros)."
+  },
+  "comment_words": {
+    "env": "KLOC_CPM_COMMENT_WORDS",
+    "default": 12,
+    "type": "int",
+    "range": [4, 30],
+    "doc": "First N words of a block comment used as fingerprint for dedup."
+  },
+  "identifier_min_len": {
+    "env": "KLOC_CPM_IDENT_MIN_LEN",
+    "default": 6,
+    "type": "int",
+    "range": [4, 12],
+    "doc": "Minimum identifier length before it's a candidate for mining."
+  },
+  "identifier_min_freq": {
+    "env": "KLOC_CPM_IDENT_MIN_FREQ",
+    "default": 4,
+    "type": "int",
+    "range": [2, 10],
+    "doc": "Min per-file occurrences of an identifier before it's globally mined."
+  },
+  "identifier_mask_min_len": {
+    "env": "KLOC_CPM_IDENT_MASK_MIN_LEN",
+    "default": 12,
+    "type": "int",
+    "range": [8, 20],
+    "doc": "Only mask identifiers longer than this (shorter = more masking, more tokens saved)."
+  }
+}

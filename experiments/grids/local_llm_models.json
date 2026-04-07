@@ -1,0 +1,8 @@
+{
+  "_doc": "Model comparison sweep: qwen2.5-coder 7b vs 14b — quality vs latency trade-off",
+  "_corpus": "synthetic",
+  "_real_llm": true,
+  "KLOC_LLM_MODEL": ["qwen2.5-coder:7b", "qwen2.5-coder:14b"],
+  "KLOC_LOCAL_LLM_MAX_CTX": [4000, 8000],
+  "KLOC_LOCAL_LLM_QUALITY_THRESHOLD": [10, 20]
+}

@@ -1,0 +1,24 @@
+{
+  "_doc": "F3 ChromatophoricMasker + C_IncludeMasker constants",
+  "_env_prefix": "KLOC_F3",
+  "kq_threshold": {
+    "env": "KLOC_F3_KQ_THRESHOLD",
+    "default": 3,
+    "type": "int",
+    "range": [1, 10],
+    "doc": "Min files a pattern must appear in to qualify as Known Quantity (KQ) and be masked."
+  },
+  "token_aware_guard": {
+    "env": "KLOC_F3_TOKEN_AWARE_GUARD",
+    "default": true,
+    "type": "bool",
+    "doc": "Only mask a line when the placeholder token count < original token count. Prevents expansion."
+  },
+  "max_registry_size": {
+    "env": "KLOC_F3_MAX_REGISTRY_SIZE",
+    "default": 1000,
+    "type": "int",
+    "range": [100, 10000],
+    "doc": "Max entries in the per-session mask registry before eviction."
+  }
+}

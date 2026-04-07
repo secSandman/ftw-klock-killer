@@ -1,0 +1,33 @@
+version: "3.9"
+
+# ╔══════════════════════════════════════════════════════╗
+# ║  FTW-KLOC-KILLER  —  docker-compose.yml              ║
+# ║  Ye vector database, matey. Spin it up:              ║
+# ║    docker-compose up -d                              ║
+# ║  Check the plunder:                                  ║
+# ║    curl http://localhost:6333/collections            ║
+# ╚══════════════════════════════════════════════════════╝
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.9.2
+    container_name: kloc_qdrant
+    ports:
+      - "6333:6333"   # REST API — loot goes here
+      - "6334:6334"   # gRPC     — optional broadside
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__LOG_LEVEL: WARN
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  qdrant_storage:
+    name: kloc_qdrant_storage

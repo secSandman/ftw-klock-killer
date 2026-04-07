@@ -1,0 +1,46 @@
+{
+  "_doc": "Predictability Index formula constants — controls which Python functions get skeletonized",
+  "_env_prefix": "KLOC_PI",
+  "threshold": {
+    "env": "KLOC_PI_THRESHOLD",
+    "default": 0.70,
+    "type": "float",
+    "range": [0.50, 0.95],
+    "doc": "PI >= threshold → function body is replaced with skeleton. Lower = more aggressive."
+  },
+  "loop_penalty": {
+    "env": "KLOC_PI_LOOP_PENALTY",
+    "default": 0.06,
+    "type": "float",
+    "range": [0.02, 0.15],
+    "doc": "Points deducted per complex construct (for/while/try/except/yield)."
+  },
+  "boilerplate_bonus": {
+    "env": "KLOC_PI_BOILERPLATE_BONUS",
+    "default": 0.15,
+    "type": "float",
+    "range": [0.0, 0.30],
+    "doc": "PI bonus when simple_ratio >= simple_ratio_threshold AND complex_count == 0."
+  },
+  "simple_ratio_threshold": {
+    "env": "KLOC_PI_SIMPLE_RATIO_THRESHOLD",
+    "default": 0.50,
+    "type": "float",
+    "range": [0.30, 0.80],
+    "doc": "Fraction of lines that must be 'simple' (assign/return/pass) to earn boilerplate_bonus."
+  },
+  "loop_free_bonus": {
+    "env": "KLOC_PI_LOOP_FREE_BONUS",
+    "default": 0.10,
+    "type": "float",
+    "range": [0.0, 0.20],
+    "doc": "Additional bonus when function has > 20 lines AND zero complex constructs."
+  },
+  "complexity_penalty_cap": {
+    "env": "KLOC_PI_COMPLEXITY_PENALTY_CAP",
+    "default": 0.35,
+    "type": "float",
+    "range": [0.10, 0.60],
+    "doc": "Maximum total complexity penalty (cap on loop_penalty * count)."
+  }
+}

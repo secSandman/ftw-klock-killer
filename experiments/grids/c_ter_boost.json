@@ -1,0 +1,8 @@
+{
+  "_doc": "C TER improvement sweep — threshold + pattern miner KQ threshold",
+  "_corpus": "doom/src/strife/p_enemy.c",
+  "_repo": "doom/",
+  "KLOC_CPI_THRESHOLD": [0.60, 0.65, 0.70, 0.75],
+  "KLOC_CPM_KQ_THRESHOLD": [2, 3, 5],
+  "KLOC_CPM_IDENT_MASK_MIN_LEN": [8, 10, 12]
+}

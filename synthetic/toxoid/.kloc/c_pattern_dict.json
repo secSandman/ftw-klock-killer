@@ -1,0 +1,98 @@
+{
+  "repo_path": "synthetic\\toxoid",
+  "total_files": 7,
+  "total_lines": 537,
+  "patterns": [
+    {
+      "hash": "1e839e32685d525d4c1965f9ba99267582bb562cbb1d9eba94b1c8058cde2f2e",
+      "original": "#include <stdio.h>",
+      "compressed": "[§:INC_1e839e32]",
+      "frequency": 7,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "a343edc8c1e6c8c5f6f4b671549f99aebdda0335ee4de152f64bceddbc1ada96",
+      "original": "#include <stdlib.h>",
+      "compressed": "[§:INC_a343edc8]",
+      "frequency": 7,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "aba4b5e7b60d25819738d231ed4d903471149d01d7482af5b7fc16f200a3f5d8",
+      "original": "#include <string.h>",
+      "compressed": "[§:INC_aba4b5e7]",
+      "frequency": 7,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "bdeed8244547341f3d1de3131bdb89c9c6b9b16f903595b60b44f37ab09ac204",
+      "original": "#include <math.h>",
+      "compressed": "[§:INC_bdeed824]",
+      "frequency": 7,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "a0bbda66ad9a477ef42f8795fce4377ab6b775c680c694940f8941738aa8027f",
+      "original": "#include <stdint.h>",
+      "compressed": "[§:INC_a0bbda66]",
+      "frequency": 7,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "12aba5c9b1aad255aaea5febd16ed96f799f580f3e33676236bf47e05f8d16ec",
+      "original": "#include \"types.h\"",
+      "compressed": "[§:INC_12aba5c9]",
+      "frequency": 6,
+      "pattern_type": "include"
+    },
+    {
+      "hash": "3c88cb89355982f73c5bb9b301e1632d5851565818e9f64087d96a47659961b1",
+      "original": "#define TOXOID_VERSION  \"1.0.0-synthetic\"",
+      "compressed": "[§:DEF_3c88cb89]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "2b2d66e56eb745bfe1be82127158a62eaafc07eba8aad0abe7d66187e30f8549",
+      "original": "#define MAX_ENTITIES    256",
+      "compressed": "[§:DEF_2b2d66e5]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "2d53ce2dec63f9327c3e296c4cd97276b83f21842821148adbe39cde7c0e0257",
+      "original": "#define SCREEN_WIDTH    320",
+      "compressed": "[§:DEF_2d53ce2d]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "0596686ab7e68c5e2bb1c5aa061249cd4bc38e87cad1d63431be4c89262db003",
+      "original": "#define SCREEN_HEIGHT   200",
+      "compressed": "[§:DEF_0596686a]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "86edc7bbd0c60fab58b6060a4b49f22aca2c0e8f0cd853f714c4b626cb122ff0",
+      "original": "#define FIXED_SCALE     65536",
+      "compressed": "[§:DEF_86edc7bb]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "03b6c3efba2d5ecf24f8e09aa21b721b68d88814372d74feda247b7e36d494d0",
+      "original": "#define DEBUG_LOG(msg)  fprintf(stderr, \"[TOXOID] %s\\n\", (msg))",
+      "compressed": "[§:DEF_03b6c3ef]",
+      "frequency": 7,
+      "pattern_type": "define"
+    },
+    {
+      "hash": "556e39faba9b58f758bb17de478196ad25afa6428db95fdfe764fd4a5135c11c",
+      "original": "/* * TOXOID — A synthetic arcade shooter for compression benchmarking. *",
+      "compressed": "[§:CMT_556e39fa]",
+      "frequency": 7,
+      "pattern_type": "comment_block"
+    }
+  ]
+}

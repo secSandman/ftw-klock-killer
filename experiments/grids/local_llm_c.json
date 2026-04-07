@@ -1,0 +1,9 @@
+{
+  "_doc": "Local LLM sweep on C corpus — 16 experiments, context vs threshold on game code",
+  "_corpus": "c",
+  "_real_llm": true,
+  "KLOC_LOCAL_LLM_MAX_CTX": [2000, 4000, 8000, 16000],
+  "KLOC_LOCAL_LLM_QUALITY_THRESHOLD": [10, 20, 40],
+  "KLOC_LOCAL_LLM_TEMPERATURE": [0.1],
+  "KLOC_CPI_THRESHOLD": [0.40]
+}

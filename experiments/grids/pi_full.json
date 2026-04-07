@@ -1,0 +1,6 @@
+{
+  "_doc": "Full PI formula sweep — 3×3×3 = 27 combos, ~60s at 4 workers",
+  "KLOC_PI_THRESHOLD": [0.60, 0.65, 0.70, 0.75, 0.80],
+  "KLOC_PI_BOILERPLATE_BONUS": [0.10, 0.15, 0.20, 0.25],
+  "KLOC_PI_LOOP_FREE_BONUS": [0.05, 0.10, 0.15]
+}
