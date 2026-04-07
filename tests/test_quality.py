@@ -309,3 +309,96 @@ class TestQualityRegressionTracker:
             report = tracker.report()
             assert report.tasks_evaluated >= 1
             assert report.mean_rqs > 0
+
+
+# ── RQS v2 — non-circular metric (audit fix 2026-04-07) ───────────────────────
+
+class TestRqsV2:
+    """
+    Three tests verifying compute_rqs_v2() is a different signal from v1.
+
+    Test 1: v2 offline returns a score in [0.0, 1.0]
+    Test 2: v2 != v1 for aggressively compressed input (proves it's a different signal)
+    Test 3: v2 with ACTIVE_TIER_MAX=0 falls back without raising an exception
+    """
+
+    _ORIGINAL = """
+def authenticate_user(username: str, password: str) -> bool:
+    \"\"\"Verify credentials against the database.\"\"\"
+    record = db.get_user(username)
+    if record is None:
+        return False
+    return bcrypt.checkpw(password.encode(), record.pw_hash)
+
+def generate_token(user_id: int, expiry_hours: int = 24) -> str:
+    \"\"\"Create a signed JWT for the given user.\"\"\"
+    payload = {"sub": user_id, "exp": time.time() + expiry_hours * 3600}
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+def revoke_token(token: str) -> None:
+    \"\"\"Add token to the revocation list.\"\"\"
+    REVOKED.add(token)
+"""
+
+    # Aggressively compressed: all bodies gone, only stubs remain
+    _COMPRESSED = """
+def authenticate_user(username, password): ...
+def generate_token(user_id, expiry_hours=24): ...
+def revoke_token(token): ...
+"""
+
+    def test_v2_offline_score_in_range(self):
+        """v2 offline path returns a float in [0.0, 1.0]."""
+        import os
+        from quality import compute_rqs_v2
+        old = os.environ.pop("ACTIVE_TIER_MAX", None)
+        os.environ["ACTIVE_TIER_MAX"] = "0"
+        try:
+            score = compute_rqs_v2(self._ORIGINAL, self._COMPRESSED)
+            assert isinstance(score, float), f"Expected float, got {type(score)}"
+            assert 0.0 <= score <= 1.0, f"Score {score} out of [0, 1]"
+        finally:
+            os.environ.pop("ACTIVE_TIER_MAX", None)
+            if old is not None:
+                os.environ["ACTIVE_TIER_MAX"] = old
+
+    def test_v2_differs_from_v1_on_aggressive_compression(self):
+        """
+        v2 must NOT equal v1 for aggressively compressed input.
+        If they were the same metric, this test would catch the regression.
+        v1 (CSO) compares all tokens — aggressive compression makes it low.
+        v2 (ROUGE-L on interface) focuses on signatures — they survived here.
+        """
+        import os
+        from quality import compute_rqs_v1, compute_rqs_v2
+        old = os.environ.pop("ACTIVE_TIER_MAX", None)
+        os.environ["ACTIVE_TIER_MAX"] = "0"
+        try:
+            v1 = compute_rqs_v1(self._ORIGINAL, self._COMPRESSED)
+            v2 = compute_rqs_v2(self._ORIGINAL, self._COMPRESSED)
+            assert v1 != v2, (
+                f"v1={v1} and v2={v2} are identical — "
+                "v2 is not providing a different signal from v1."
+            )
+        finally:
+            os.environ.pop("ACTIVE_TIER_MAX", None)
+            if old is not None:
+                os.environ["ACTIVE_TIER_MAX"] = old
+
+    def test_v2_offline_fallback_no_exception(self):
+        """v2 with ACTIVE_TIER_MAX=0 must return a score without raising."""
+        import os
+        from quality import compute_rqs_v2
+        os.environ["ACTIVE_TIER_MAX"] = "0"
+        # Deliberately clear any API key so online path cannot activate
+        saved_key = os.environ.pop("ANTHROPIC_API_KEY", None)
+        saved_oai  = os.environ.pop("OPENAI_API_KEY", None)
+        try:
+            score = compute_rqs_v2(self._ORIGINAL, self._COMPRESSED, question="explain auth")
+            assert 0.0 <= score <= 1.0
+        except Exception as e:
+            raise AssertionError(f"v2 offline path raised an exception: {e}") from e
+        finally:
+            os.environ.pop("ACTIVE_TIER_MAX", None)
+            if saved_key:  os.environ["ANTHROPIC_API_KEY"] = saved_key
+            if saved_oai:  os.environ["OPENAI_API_KEY"]   = saved_oai

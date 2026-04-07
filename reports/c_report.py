@@ -2,7 +2,7 @@
 c_report.py — Professional C compression analysis report
 =========================================================
 Generates terminal + HTML reports showing per-algorithm token savings,
-quality metrics (RQS-L1), and cost impact for a C/C++ source file.
+consistency metrics (CCC — Code Consistency Comparison), and cost impact for a C/C++ source file.
 
 Terminal: Unicode block-char bar charts, per-function table, toggle matrix.
 HTML:     Dark-theme dashboard with Chart.js charts (opens in browser).
@@ -176,11 +176,13 @@ def _build_exec_summary(r: "CReport") -> str:
     ) or "none"
 
     quality_verdict = (
-        "Quality is preserved — semantic similarity (RQS-L1) of the compressed output "
-        f"vs original is {rqs:.3f}, comfortably above the 0.85 pass threshold."
+        "Compression consistency (CCC) of the compressed output "
+        f"vs original is {rqs:.3f}, comfortably above the 0.85 pass threshold. "
+        f"CCC = Code Consistency Comparison — a token-overlap score, not a quality score."
         if quality_pass else
-        f"⚠ Quality gate: RQS-L1 = {rqs:.3f} is below the 0.85 threshold. "
-        "Consider reducing the skeleton aggressiveness."
+        f"⚠ Consistency gate: CCC = {rqs:.3f} is below the 0.85 threshold. "
+        "Consider reducing the skeleton aggressiveness. "
+        "CCC = Code Consistency Comparison — a token-overlap score, not a quality score."
     )
 
     return (
@@ -191,7 +193,8 @@ def _build_exec_summary(r: "CReport") -> str:
         f"<strong>Overall result:</strong> The full compression pipeline (F1+F3+F4) "
         f"reduced this file from <strong>{r.wf_orig:,} → {r.wf_cav:,} tokens</strong>, "
         f"a <strong>{r.ter_overall:.1f}% Token Efficiency Ratio (TER)</strong>. "
-        f"True Value (TER × RQS) = <strong>{tv:.4f}</strong>."
+        f"True Value (TER × CCC) = <strong>{tv:.4f}</strong> "
+        f"(simulation context — measures compression consistency, not absolute quality)."
         f"<br><br>"
         f"<strong>Primary driver — F1 Skeleton ({f1_ter:.1f}% TER):</strong> "
         f"{skel_count} of {total_fn} functions had their bodies replaced with a single-line "
@@ -203,7 +206,20 @@ def _build_exec_summary(r: "CReport") -> str:
         f"<br><br>"
         f"<strong>Tertiary — F4 Caveman ({f4_ter:.1f}% TER):</strong> {f4_note}"
         f"<br><br>"
-        f"<strong>Quality:</strong> {quality_verdict}"
+        f"<strong>Consistency (CCC):</strong> {quality_verdict}"
+        f"<br><br>"
+        f"<strong>What CCC does NOT measure — future roadmap:</strong>"
+        f"<ul>"
+        f"<li><strong>M7 — Eval set (correctness)</strong>: Build 20–30 questions about p_enemy.c "
+        f"and the synthetic corpus with known-correct answers. Run pipeline output against "
+        f"ground truth. This is the only way to measure whether the answer is right, not just consistent.</li>"
+        f"<li><strong>M8 — pass@k (codegen tasks)</strong>: For code generation queries, execute "
+        f"the generated code against unit tests. HumanEval-style. Currently L2 in quality.py "
+        f"is implemented but not wired into the benchmark.</li>"
+        f"<li><strong>M9 — Human eval panel</strong>: 10–20 hand-labelled question/answer pairs "
+        f"rated by a human. Ground truth for calibrating all other metrics.</li>"
+        f"</ul>"
+        f"CCC tells you compression did not change the answer. It does not tell you the answer was good."
         f"<br><br>"
         f"<strong>What is not in scope:</strong> This report covers single-file compression "
         f"only. Multi-file ETL, cross-file deduplication, and RAG embedding are separate "
@@ -229,12 +245,13 @@ def _build_exec_summary(r: "CReport") -> str:
 
 # ── Core analysis ──────────────────────────────────────────────────────────────
 
-def _rqs(a: str, b: str) -> float:
+def _ccc(a: str, b: str) -> float:
+    """CCC — Code Consistency Comparison (TF cosine, offline path)."""
     if a == b:
         return 1.0
     try:
-        from src.quality import compute_semantic_similarity
-        return round(compute_semantic_similarity(a, b), 3)
+        from src.quality import compute_ccc_v1
+        return round(compute_ccc_v1(a, b), 3)
     except Exception:
         return 0.95
 
@@ -369,15 +386,15 @@ def generate_c_report(
     variants = [
         AlgoVariant("None",     "No compression (baseline)",              orig_tokens,  0.0,   1.000),
         AlgoVariant("F4 only",  "Caveman: stop-word strip in comments",   count_tokens(f4_only),
-                    _ter(orig_tokens, count_tokens(f4_only)),  _rqs(source, f4_only)),
+                    _ter(orig_tokens, count_tokens(f4_only)),  _ccc(source, f4_only)),
         AlgoVariant("F3 only",  "Masking: #include/#define→[§:tok]",      count_tokens(f3_only_s),
-                    _ter(orig_tokens, count_tokens(f3_only_s)), _rqs(source, f3_only_s)),
+                    _ter(orig_tokens, count_tokens(f3_only_s)), _ccc(source, f3_only_s)),
         AlgoVariant("F1 only",  "Skeleton: fn bodies→/*skeletonized*/",   count_tokens(after_skel),
-                    _ter(orig_tokens, count_tokens(after_skel)), _rqs(source, after_skel)),
+                    _ter(orig_tokens, count_tokens(after_skel)), _ccc(source, after_skel)),
         AlgoVariant("F1+F3",    "Skeleton + Masking",                     count_tokens(after_mask),
-                    _ter(orig_tokens, count_tokens(after_mask)), _rqs(source, after_mask)),
+                    _ter(orig_tokens, count_tokens(after_mask)), _ccc(source, after_mask)),
         AlgoVariant("F1+F3+F4", "Full pipeline (all three)",              count_tokens(after_cav),
-                    _ter(orig_tokens, count_tokens(after_cav)),  _rqs(source, after_cav)),
+                    _ter(orig_tokens, count_tokens(after_cav)),  _ccc(source, after_cav)),
     ]
 
     generated_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -612,7 +629,8 @@ def _print_terminal(r: CReport) -> None:
     # ── 3. Algorithm toggle matrix ────────────────────────────────────────
     print("  ALGORITHM TOGGLE COMPARISON  (dry run — each config standalone)")
     print(f"  {DIV}")
-    print(f"  {'Config':<14}  {'Tokens':>7}  {'TER':>6}  {'RQS-L1':>7}  {'T1 cost':>9}  {'T2 cost':>9}  Bar")
+    print(f"  {'Config':<14}  {'Tokens':>7}  {'TER':>6}  {'CCC':>7}  {'T1 cost':>9}  {'T2 cost':>9}  Bar")
+    print(f"  NOTE: CCC = Code Consistency Comparison (token overlap, not quality)")
     print(f"  {DIV}")
     for v in r.variants:
         rq_icon = "✓" if v.rqs_l1 >= 0.85 else ("⚠" if v.rqs_l1 >= 0.70 else "✗")
@@ -624,16 +642,17 @@ def _print_terminal(r: CReport) -> None:
     print(f"  {DIV}")
     print()
 
-    # ── 4. Quality gate ───────────────────────────────────────────────────
+    # ── 4. Consistency gate (CCC) ──────────────────────────────────────────
     full = r.variants[-1] if r.variants else None
-    print("  QUALITY GATE")
+    print("  CONSISTENCY GATE  (CCC — Code Consistency Comparison)")
+    print(f"  NOTE: CCC measures token overlap, not whether answers are correct.")
     print(f"  {DIV}")
     if full:
         tv = round((r.ter_overall / 100) * full.rqs_l1, 4)
         rq_verdict = "PASS ✓" if full.rqs_l1 >= 0.85 else ("WARN ⚠" if full.rqs_l1 >= 0.70 else "FAIL ✗")
         print(f"  TER        {r.ter_overall:>6.1f}%  (target >80%)")
-        print(f"  RQS-L1     {full.rqs_l1:>7.3f}  (threshold 0.85)  [{rq_verdict}]")
-        print(f"  True Value {tv:>7.4f}  (TER x RQS-L1 combined score)")
+        print(f"  CCC        {full.rqs_l1:>7.3f}  (threshold 0.85)  [{rq_verdict}]")
+        print(f"  True Value {tv:>7.4f}  (TER x CCC — compression consistency score)")
     print(f"  {DIV}")
     print()
 
@@ -941,7 +960,7 @@ tr:hover td{{background:rgba(88,166,255,.04)}}
   </div>
   <div class="card">
     <div class="big" style="color:{rqs_color}">{rqs:.3f}</div>
-    <div class="lbl">RQS-L1 semantic similarity (&ge;0.85 pass)</div>
+    <div class="lbl">CCC consistency score (&ge;0.85 pass)</div>
   </div>
   <div class="card">
     <div class="big">{r.wf_orig:,}</div>
@@ -953,7 +972,7 @@ tr:hover td{{background:rgba(88,166,255,.04)}}
   </div>
   <div class="card">
     <div class="big" style="color:var(--ac)">{tv:.4f}</div>
-    <div class="lbl">True Value = TER &times; RQS-L1</div>
+    <div class="lbl">True Value = TER &times; CCC (consistency)</div>
   </div>
 </div>
 
@@ -1014,11 +1033,16 @@ tr:hover td{{background:rgba(88,166,255,.04)}}
   <div class="cw"><canvas id="qualityLine"></canvas></div>
 </div>
 <div class="sect">
+<p class="note" style="margin-bottom:12px">
+  <strong>CCC (Code Consistency Comparison)</strong> measures token overlap between original and
+  compressed source. It is a consistency metric, not a quality metric — it does not measure
+  whether the compressed context produces correct or helpful answers. See Executive Summary for roadmap.
+</p>
 <table>
 <thead><tr>
   <th>Config</th><th>Description</th>
   <th>Tokens</th><th>TER</th><th>Tokens Saved</th>
-  <th>RQS-L1</th><th>Cost/req T1 Haiku</th><th>Cost/req T2 Sonnet</th>
+  <th>CCC</th><th>Cost/req T1 Haiku</th><th>Cost/req T2 Sonnet</th>
 </tr></thead>
 <tbody>{var_rows}</tbody>
 </table>
@@ -1130,9 +1154,15 @@ tr:hover td{{background:rgba(88,166,255,.04)}}
 </p>
 </div>
 
-<!-- ── Quality Gate ──────────────────────────────────────────────────────── -->
-<h2>Quality Gate</h2>
+<!-- ── Consistency Gate ──────────────────────────────────────────────────── -->
+<h2>Consistency Gate (CCC &mdash; Code Consistency Comparison)</h2>
 <div class="card">
+  <p class="note" style="margin-bottom:14px">
+    CCC measures token overlap between original and compressed source. A score &ge;0.85
+    means the compressed output retains most of the original tokens. This is a
+    <strong>consistency</strong> metric, not a <strong>quality</strong> metric — it does not
+    measure whether compressed context produces correct answers.
+  </p>
   <div class="tv">
     <div>
       <div class="tv-v" style="color:{ter_color}">{r.ter_overall:.1f}%</div>
@@ -1140,11 +1170,11 @@ tr:hover td{{background:rgba(88,166,255,.04)}}
     </div>
     <div>
       <div class="tv-v" style="color:{rqs_color}">{rqs:.3f}</div>
-      <div class="tv-l">RQS-L1 &mdash; &ge;0.85 to pass</div>
+      <div class="tv-l">CCC &mdash; &ge;0.85 to pass</div>
     </div>
     <div>
       <div class="tv-v" style="color:var(--ac)">{tv:.4f}</div>
-      <div class="tv-l">True Value = TER &times; RQS</div>
+      <div class="tv-l">True Value = TER &times; CCC</div>
     </div>
     <div>
       <div class="tv-v" style="color:{qv_color}">{qverdict}</div>
@@ -1200,17 +1230,17 @@ new Chart('algoBar',{{type:'bar',data:{{
   }}
 }}}});
 
-// Quality / TER tradeoff line
+// CCC / TER tradeoff line
 new Chart('qualityLine',{{type:'line',data:{{
   labels:{_j(algo_names)},
   datasets:[
-    {{label:'RQS-L1 (quality)',data:{_j(algo_rqs)},borderColor:'#3fb950',
+    {{label:'CCC (consistency)',data:{_j(algo_rqs)},borderColor:'#3fb950',
      backgroundColor:'rgba(63,185,80,.1)',tension:.3,fill:true,pointRadius:5}},
     {{label:'TER/100 (compression)',data:{_j([round(t/100,3) for t in algo_ter])},
      borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.1)',tension:.3,fill:true,pointRadius:5}}
   ]
 }},options:{{
-  plugins:{{title:{{display:true,text:'Quality vs compression trade-off per config',color:'#e6edf3',font:{{size:12}}}}}},
+  plugins:{{title:{{display:true,text:'CCC consistency vs compression trade-off per config',color:'#e6edf3',font:{{size:12}}}}}},
   scales:{{y:{{min:0,max:1.05,grid:G}},x:{{grid:{{display:false}}}}}}
 }}}});
 

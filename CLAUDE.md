@@ -7,8 +7,12 @@ pipe source code through a compression chain before sending it to an LLM.
 The goal: pay less, lose nothing.
 
 Core metric: **TER** (Token Efficiency Ratio) — current baseline **85.4%** (Python synthetic).
-Quality gate: **RQS** (Response Quality Score) — floor **0.85**.
-True value = TER × RQS. Both must be satisfied simultaneously.
+Consistency gate: **CCC** (Code Consistency Comparison) — floor **0.85**.
+True value = TER × CCC (simulation context). Both must be satisfied simultaneously.
+
+**NOTE:** CCC is a CONSISTENCY metric (token overlap), not a QUALITY metric (answer correctness).
+The term "RQS-L1" has been renamed to "CCC" to accurately describe what is measured.
+The real-LLM metric `rqs_llm` / `RQS-LLM` from `experiments/local_llm.py` is NOT renamed.
 
 ## Project Structure
 
@@ -36,9 +40,10 @@ tests/                  pytest suite covering all layers
 - List comprehensions `[x for x in ...]` on a single line do NOT count as loops
 
 ### Benchmark Baseline
-- 85.4% TER is the accepted baseline (from `src/benchmark.py --mode synthetic`)
+- **79.3% TER** is the accepted baseline (default config, `PI_THRESHOLD=0.70`, synthetic corpus)
 - Do not regress below this without explicit user approval
-- 80% target was met 2026-04-06 — new floor is 85%
+- Override via `KLOC_BASELINE_TER` env var — this is the single source of truth (defined in `src/benchmark.py`)
+- 85.4% was an experimental result at `PI_THRESHOLD=0.85`, not the default baseline
 
 ### Message Bus Channels (fixed order)
 ```
@@ -184,6 +189,7 @@ from 0.870 to 0.731, and TV rises from 0.313 to 0.398 (+27%).
 | `f4` | `KLOC_F4_VOWEL_PRUNE_MIN_LEN` | `experiments/params/caveman_f4.json` |
 | `tfidf` | `KLOC_USE_TFIDF_RQS`, `KLOC_TFIDF_IDF_FLOOR` | — |
 | `sig` | `KLOC_SKELETON_SIG_RETAIN`, `KLOC_SKELETON_SIG_MAX_IDS` | — |
+| `rqs_version` | `KLOC_RQS_VERSION=v1\|v2` | `v1` = CSO (legacy, circular); `v2` = ROUGE-L/Haiku (non-circular) |
 
 #### Grid files in `experiments/grids/`
 

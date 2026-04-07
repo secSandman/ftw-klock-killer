@@ -2,21 +2,23 @@
 
 > Last updated: 2026-04-06
 > Owner: txsan
-> Core metric: **TER × RQS ≥ 0.85** (True Value) at every layer
+> Core metric: **TER × CCC ≥ 0.85** (True Value — compression consistency) at every layer
+> NOTE: CCC (Code Consistency Comparison) measures token overlap, not answer correctness.
+> True quality measurement requires an eval set. See M7 below.
 
 ---
 
 ## Current State (Baseline)
 
-| Language | File | TER | RQS-L1 | True Value | Status |
-|----------|------|-----|--------|------------|--------|
+| Language | File | TER | CCC | True Value | Status |
+|----------|------|-----|-----|------------|--------|
 | Python   | synthetic corpus | 77.9% | — | — | ✅ passing, below 80% target |
 | C/C++    | doom/p_enemy.c | 35.0% | 0.862 | 0.3017 | ✅ algorithms verified |
 | Go       | — | — | — | — | ⬜ parser built, no benchmark |
 | Rust     | — | — | — | — | ⬜ parser built, no benchmark |
 
 **Known regressions / open bugs:**
-- ISSUE-002: Post-inference RQS cascade not implemented (quality checked pre-send only)
+- ISSUE-002: Post-inference CCC cascade not implemented (consistency checked pre-send only)
 - ISSUE-003: `[§:hash]` placeholders not unmasked in LLM responses
 - ISSUE-004: Bus JSONL rotation/compaction not implemented (files grow unbounded)
 
@@ -105,7 +107,7 @@ This requires running a batch of real queries end-to-end and tracking which tier
 |----|---------|-----------------|-----------------|
 | RAG-001 | Wire RAG retrieval into `kloc.py pipeline` command | Pipeline sends ≤5 chunks instead of whole file | ~70% additional reduction post-F1/F3/F4 |
 | RAG-002 | C ETL verified end-to-end (mine → chunk → compress → embed → upsert) | `kloc.py etl-c --repo doom` completes with no errors, chunks queryable | Doom codebase searchable by semantic query |
-| RAG-003 | Top-K retrieval quality gate | Retrieved chunks answer question at RQS-L1 ≥ 0.85 vs whole-file baseline | Confirms retrieval doesn't lose critical context |
+| RAG-003 | Top-K retrieval consistency gate | Retrieved chunks answer question at CCC ≥ 0.85 vs whole-file baseline | Confirms retrieval doesn't lose critical context |
 | RAG-004 | Report: show "with RAG" column in toggle comparison | Report shows tokens with and without RAG layer | Visual proof of compound savings |
 
 ---
@@ -130,12 +132,12 @@ This requires running a batch of real queries end-to-end and tracking which tier
 
 **Why it matters:** Rule-based compression hits a ceiling (we can't remove semantically important code). A learned compressor can go further.
 
-**Risk:** Quality degradation. The small model may misunderstand and drop important context. Must be gated strictly by RQS.
+**Risk:** Quality degradation. The small model may misunderstand and drop important context. Must be gated strictly by CCC.
 
 | ID | Feature | Success Criteria | Expected Result |
 |----|---------|-----------------|-----------------|
 | SEM-001 | Haiku-based prompt rewriter agent | New agent rewrites chunk using structured prompt: "Compress this code for an LLM. Keep all logic, remove verbosity." | 20-40% additional TER on top of F1+F3+F4 |
-| SEM-002 | Quality gate on semantic compression output | RQS-L1(original, rewritten) ≥ 0.85 before allowing | Rejects bad compressions automatically |
+| SEM-002 | Consistency gate on semantic compression output | CCC(original, rewritten) ≥ 0.85 before allowing | Rejects bad compressions automatically |
 | SEM-003 | Cost model: verify Haiku compression cost < Sonnet savings | cost(Haiku rewrite) < (orig_tokens - compressed_tokens) × Sonnet_price | Net positive ROI at ≥500 req/day |
 
 ---
@@ -180,10 +182,36 @@ python kloc.py experiment pipeline-batch \
 
 | ID | Feature | Success Criteria | Expected Result |
 |----|---------|-----------------|-----------------|
-| PROD-001 | Post-inference RQS cascade (ISSUE-002) | After LLM response received, compare with un-compressed baseline RQS | Detect quality regressions in production, not just pre-send |
+| PROD-001 | Post-inference CCC cascade (ISSUE-002) | After LLM response received, compare with un-compressed baseline CCC | Detect consistency regressions in production, not just pre-send |
 | PROD-002 | Global pattern dictionary across repos | Patterns seen in 10+ repos promoted to global dict | Better F3 masking on first-seen repos |
-| PROD-003 | Continuous benchmark CI | GitHub Actions runs `benchmark --mode synthetic` on every PR | Never regress below 77.9% TER |
+| PROD-003 | Continuous benchmark CI | GitHub Actions runs `benchmark --mode synthetic` on every PR | Never regress below 77.9% TER or CCC 0.65 |
 | PROD-004 | Dashboard: live TER + cost savings over session | Web UI showing running totals per session | Product-quality demo capability |
+
+---
+
+---
+
+### M7 — True Quality Measurement (eval set)
+
+**What it is:** Build a small eval set — 20–30 questions about the benchmark corpus
+with known-correct answers. Measure whether the pipeline's output matches ground truth.
+
+**Why it matters:** Every metric currently in the system measures *consistency*
+(does compression change the answer?) not *correctness* (is the answer right?).
+CCC, RQS-LLM, ROUGE-L, LLM-as-Judge — all compare compressed vs full. None of them
+catch the case where both answers are equally wrong.
+
+**What needs to be built:**
+
+| ID | Feature | Success Criteria |
+|----|---------|-----------------|
+| EVAL-001 | Eval set: 20 questions + ground-truth answers for p_enemy.c | JSON file: [{question, ground_truth, tags}] |
+| EVAL-002 | pass@k scorer for codegen tasks | L2 functional score wired into default benchmark |
+| EVAL-003 | Exact-match / ROUGE-L scorer against ground truth | Not against another LLM response — against human-written answer |
+| EVAL-004 | Human eval panel: 10 labelled pairs | Calibration baseline for all automated metrics |
+
+**Current honest position:** CCC=0.650 means the compressed context produces
+similar-sounding answers to the full context. It does not mean those answers are correct.
 
 ---
 
@@ -191,12 +219,13 @@ python kloc.py experiment pipeline-batch \
 
 | Milestone | Definition of Done |
 |-----------|-------------------|
-| **M1 — Python 80%** | `benchmark --mode synthetic` TER ≥ 80%, RQS ≥ 0.85 |
-| **M2 — C 40%** | `report-c` on Doom p_enemy.c TER ≥ 40%, RQS ≥ 0.85 |
+| **M1 — Python 80%** | `benchmark --mode synthetic` TER ≥ 80%, CCC ≥ 0.85 |
+| **M2 — C 40%** | `report-c` on Doom p_enemy.c TER ≥ 40%, CCC ≥ 0.85 |
 | **M3 — RAG wired** | `pipeline` command uses RAG retrieval, cumulative TER ≥ 75% on C |
-| **M4 — True Value 0.70** | Full pipeline TER × RQS ≥ 0.70 on any real-world file |
+| **M4 — True Value 0.70** | Full pipeline TER × CCC ≥ 0.70 on any real-world file |
 | **M5 — 95% ceiling** | All staircase layers live, theoretical ceiling demonstrated in report |
 | **M6 — Blended metric** | `pipeline_batch` runs 20+ queries; blended_cost and acceptance_rate reported (PROTO-001) |
+| **M7 — True quality** | Eval set built (EVAL-001), pass@k wired (EVAL-002), human calibration (EVAL-004) |
 
 ---
 

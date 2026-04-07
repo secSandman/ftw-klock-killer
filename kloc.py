@@ -253,9 +253,9 @@ def _detect_lang(path: Path) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def cmd_rqs(args) -> int:
-    """Run only RQS-L1 on one file by comparing original vs compressed text."""
+    """Run only CCC (Code Consistency Comparison) on one file by comparing original vs compressed text."""
     from inference_bridge import InferenceBridge
-    from quality import compute_semantic_similarity, compute_code_overlap, syntax_check
+    from quality import compute_ccc, compute_code_overlap, syntax_check
 
     if not args.file:
         _print("  ❌  --file required for rqs command")
@@ -266,7 +266,7 @@ def cmd_rqs(args) -> int:
         _print(f"  ❌  File not found: {path}")
         return 1
 
-    _print(_header(f"☠️  RQS  {path.name}"))
+    _print(_header(f"☠️  CCC  {path.name}"))
 
     original = path.read_text(encoding="utf-8", errors="replace")
 
@@ -276,27 +276,29 @@ def cmd_rqs(args) -> int:
                               enable_delta=False)
         compressed, report = inb.process_file(str(path))
 
-    l1_semantic = compute_semantic_similarity(original, compressed)
-    l1_code     = compute_code_overlap(original, compressed)
+    question = getattr(args, "question", "") or ""
+    l1_ccc  = compute_ccc(original, compressed, question=question)
+    l1_code = compute_code_overlap(original, compressed)
     ok_syntax, _ = syntax_check(compressed) if path.suffix == ".py" else (True, "")
 
-    composite = round((l1_semantic * 0.6 + l1_code * 0.4), 4)
+    composite = round((l1_ccc * 0.6 + l1_code * 0.4), 4)
 
     _print()
     _print(f"  File:              {path}")
     _print(f"  TER (context):     {report.reduction_pct:.1f}%")
     _print()
-    _print(f"  L1 Semantic Sim:   {_score_icon(l1_semantic, 0.85, 0.70)}  {_bar(l1_semantic, 20)}")
+    _print(f"  CCC (consistency): {_score_icon(l1_ccc, 0.85, 0.70)}  {_bar(l1_ccc, 20)}")
     _print(f"  L1 Code Overlap:   {_score_icon(l1_code, 0.80, 0.60)}  {_bar(l1_code, 20)}")
     _print(f"  L2 Functional:     ⬜ N/A  (provide --tests to enable)")
     _print(f"  L3 LLM Judge:      ⬜ N/A  (set ANTHROPIC_API_KEY to enable)")
     _print()
     if path.suffix == ".py":
         _print(f"  Syntax valid:      {'✅ Yes' if ok_syntax else '❌ BROKEN'}")
-    _print(f"  Composite RQS:     {_score_icon(composite, 0.85, 0.70)}")
-    _print(f"  Quality floor:     0.85  {'✅ MET' if composite >= 0.85 else '❌ BELOW FLOOR'}")
+    _print(f"  Composite CCC:     {_score_icon(composite, 0.85, 0.70)}")
+    _print(f"  Consistency floor: 0.85  {'✅ MET' if composite >= 0.85 else '❌ BELOW FLOOR'}")
     _print()
-    _print(f"  True Value (TER × RQS) = {report.reduction_pct/100:.3f} × {composite:.3f} = {report.reduction_pct/100 * composite:.3f}")
+    _print(f"  NOTE: CCC measures compression consistency, not answer correctness.")
+    _print(f"  True Value (TER × CCC) = {report.reduction_pct/100:.3f} × {composite:.3f} = {report.reduction_pct/100 * composite:.3f}")
     _print()
     _print(_divider())
     return 0
@@ -322,7 +324,7 @@ def cmd_benchmark(args) -> int:
 
 def _benchmark_file(args) -> int:
     from inference_bridge import InferenceBridge
-    from quality import compute_semantic_similarity, compute_code_overlap, syntax_check
+    from quality import compute_ccc, compute_code_overlap, syntax_check
 
     path = Path(args.file)
     if not path.exists():
@@ -357,8 +359,9 @@ def _benchmark_file(args) -> int:
     orig = report.original
     ter  = report.reduction_pct
 
-    # Quality
-    l1s = compute_semantic_similarity(original_src, compressed)
+    # Quality — CCC (Code Consistency Comparison)
+    question = getattr(args, "question", "") or ""
+    l1s = compute_ccc(original_src, compressed, question=question)
     l1c = compute_code_overlap(original_src, compressed)
     composite = round(l1s * 0.6 + l1c * 0.4, 4)
     true_value = round((ter / 100) * composite, 4)
@@ -374,19 +377,20 @@ def _benchmark_file(args) -> int:
     _print(f"  TER:    {_ter_icon(ter)}   target >80%")
     _print()
 
-    _print("  RESPONSE QUALITY SCORE (RQS)")
+    _print("  CODE CONSISTENCY COMPARISON (CCC)")
+    _print(f"  NOTE: CCC measures token overlap consistency, not answer correctness.")
     _print(_divider())
-    _print(f"  L1 Semantic Similarity  {_score_icon(l1s, 0.85, 0.70)}  {_bar(l1s, 22)}  floor 0.85")
+    _print(f"  CCC (consistency)       {_score_icon(l1s, 0.85, 0.70)}  {_bar(l1s, 22)}  floor 0.85")
     _print(f"  L1 Code Overlap         {_score_icon(l1c, 0.80, 0.60)}  {_bar(l1c, 22)}")
     _print(f"  L2 Functional           ⬜ N/A  (pass --tests FILE to enable)")
     _print(f"  L3 LLM Judge            ⬜ N/A  (set ANTHROPIC_API_KEY to enable)")
     _print(_divider())
-    _print(f"  Composite RQS:  {_score_icon(composite, 0.85, 0.70)}")
+    _print(f"  Composite CCC:  {_score_icon(composite, 0.85, 0.70)}")
     _print()
 
     _print("  COMBINED VERDICT")
     _print(_divider())
-    _print(f"  True Value  =  TER × RQS  =  {ter/100:.3f} × {composite:.3f}  =  {true_value:.3f}")
+    _print(f"  True Value  =  TER × CCC  =  {ter/100:.3f} × {composite:.3f}  =  {true_value:.3f}")
     verdict = _combined_verdict(ter, composite)
     _print(f"  Verdict:    {verdict}")
     _print(f"  Elapsed:    {elapsed:.3f}s")
@@ -416,7 +420,7 @@ def _benchmark_corpus(args) -> int:
         return 1
 
     from inference_bridge import InferenceBridge
-    from quality import compute_semantic_similarity, compute_code_overlap
+    from quality import compute_ccc, compute_code_overlap
 
     lang_filter = args.lang or None
     ext_map = {"python": [".py"], "c": [".c", ".h"], "go": [".go"], "rust": [".rs"]}
@@ -439,7 +443,7 @@ def _benchmark_corpus(args) -> int:
     total_orig = total_final = 0
     l1s_scores = []
 
-    _print(f"  {'File':<28} {'Orig':>6} {'Final':>6} {'TER':>7} {'RQS-L1':>8}")
+    _print(f"  {'File':<28} {'Orig':>6} {'Final':>6} {'TER':>7} {'CCC':>8}")
     _print(_divider())
 
     for fpath in files:
@@ -451,18 +455,18 @@ def _benchmark_corpus(args) -> int:
                                       enable_delta=False)
                 compressed, report = inb.process_file(str(fpath))
 
-            l1s = compute_semantic_similarity(original, compressed)
+            l1s = compute_ccc(original, compressed)
             total_orig  += report.original
             total_final += report.final
             l1s_scores.append(l1s)
 
             ter_icon = "✅" if report.reduction_pct >= 70 else "⚠️ "
-            rqs_icon = "✅" if l1s >= 0.85 else "⚠️ "
+            ccc_icon = "✅" if l1s >= 0.85 else "⚠️ "
             name = fpath.name[:28]
             _print(f"  {name:<28} {report.original:>6,} {report.final:>6,} "
-                   f"{ter_icon}{report.reduction_pct:>4.0f}%  {rqs_icon}{l1s:.3f}")
+                   f"{ter_icon}{report.reduction_pct:>4.0f}%  {ccc_icon}{l1s:.3f}")
             rows.append({"file": str(fpath.relative_to(corpus)),
-                         "ter": report.reduction_pct, "rqs_l1": l1s,
+                         "ter": report.reduction_pct, "ccc": l1s,
                          "orig": report.original, "final": report.final})
         except Exception as e:
             _print(f"  ⚠️  {fpath.name[:28]} — skipped ({e})")
@@ -481,14 +485,15 @@ def _benchmark_corpus(args) -> int:
     _print()
     _print(f"  Files benchmarked:  {len(rows)}")
     _print(f"  Overall TER:        {_ter_icon(overall_ter)}")
-    _print(f"  Mean RQS-L1:        {_score_icon(mean_rqs, 0.85, 0.70)}")
-    _print(f"  True Value (TER×RQS): {true_value:.3f}")
+    _print(f"  Mean CCC:           {_score_icon(mean_rqs, 0.85, 0.70)}")
+    _print(f"  NOTE: CCC = Code Consistency Comparison (token overlap, not quality)")
+    _print(f"  True Value (TER×CCC): {true_value:.3f}")
     _print()
     _print(_divider())
 
     if args.output:
         _write_json(args.output, {"corpus": str(corpus), "files": rows,
-                                   "overall_ter": overall_ter, "mean_rqs_l1": mean_rqs,
+                                   "overall_ter": overall_ter, "mean_ccc": mean_rqs,
                                    "true_value": true_value})
         _print(f"  Results saved → {args.output}")
     return 0
@@ -511,17 +516,20 @@ def _benchmark_synthetic(args) -> int:
         return 1
     _print(r.stdout)
 
-    # Compute RQS-L1 inline on the same synthetic corpus
+    # Compute CCC inline on the same synthetic corpus
     try:
         from inference_bridge import InferenceBridge
-        from quality import compute_semantic_similarity
+        from quality import rqs as _rqs_fn
         sys.path.insert(0, str(ROOT / "src"))
         from benchmark import SYNTHETIC_FILES  # type: ignore
 
+        rqs_version = os.environ.get("KLOC_RQS_VERSION", "v1")
+        col_label   = f"CCC ({rqs_version})"
         _print()
-        _print("  QUALITY SCORES (RQS-L1) on synthetic corpus")
+        _print(f"  CODE CONSISTENCY COMPARISON ({col_label}) on synthetic corpus")
+        _print(f"  NOTE: CCC = token overlap consistency, not answer correctness.")
         _print(_divider())
-        _print(f"  {'File':<28} {'RQS-L1':>8}  {'Status'}")
+        _print(f"  {'File':<28} {col_label:>12}  {'Status'}")
         _print(_divider())
 
         scores = []
@@ -532,14 +540,14 @@ def _benchmark_synthetic(args) -> int:
                 src_file = Path(tmp) / fname
                 src_file.write_text(source)
                 compressed, report = inb.process_file(str(src_file))
-            l1 = compute_semantic_similarity(source, compressed)
+            l1 = _rqs_fn(source, compressed)
             scores.append(l1)
             icon = "✅" if l1 >= 0.85 else ("⚠️ " if l1 >= 0.70 else "❌")
             _print(f"  {fname:<28} {l1:.4f}   {icon}")
 
         mean = sum(scores) / len(scores)
         _print(_divider())
-        _print(f"  {'Mean RQS-L1':<28} {mean:.4f}   {_score_icon(mean, 0.85, 0.70)}")
+        _print(f"  {f'Mean {col_label}':<28} {mean:.4f}   {_score_icon(mean, 0.85, 0.70)}")
         _print()
 
         # Extract TER from benchmark.py output
@@ -550,23 +558,23 @@ def _benchmark_synthetic(args) -> int:
                 ter = float(m.group(1))
         if ter:
             tv = (ter / 100) * mean
-            _print(f"  True Value (TER × RQS) = {ter/100:.3f} × {mean:.3f} = {tv:.3f}")
+            _print(f"  True Value (TER × CCC) = {ter/100:.3f} × {mean:.3f} = {tv:.3f}")
+            _print(f"  NOTE: True Value here measures compression consistency, not correctness.")
             _print()
 
     except Exception as e:
-        _print(f"  ⚠️  RQS scoring skipped: {e}")
+        _print(f"  ⚠️  CCC scoring skipped: {e}")
 
     _print(_divider())
     return 0
 
 
-def _combined_verdict(ter: float, rqs: float) -> str:
-    tv = (ter / 100) * rqs
-    if ter >= 80 and rqs >= 0.90: return "🏆 EXCELLENT — max compression, max quality"
-    if ter >= 80 and rqs >= 0.85: return "✅ PASSED — hits both TER and RQS targets"
-    if ter >= 70 and rqs >= 0.85: return "✅ GOOD — quality solid, push TER higher"
-    if ter >= 80 and rqs < 0.85:  return "⚠️  QUALITY RISK — TER great, RQS below floor"
-    if ter < 70  and rqs >= 0.85: return "⚠️  LOW COMPRESSION — raise pi_threshold or add masking"
+def _combined_verdict(ter: float, ccc: float) -> str:
+    if ter >= 80 and ccc >= 0.90: return "🏆 EXCELLENT — max compression, max consistency"
+    if ter >= 80 and ccc >= 0.85: return "✅ PASSED — hits both TER and CCC targets"
+    if ter >= 70 and ccc >= 0.85: return "✅ GOOD — consistency solid, push TER higher"
+    if ter >= 80 and ccc < 0.85:  return "⚠️  CONSISTENCY RISK — TER great, CCC below floor"
+    if ter < 70  and ccc >= 0.85: return "⚠️  LOW COMPRESSION — raise pi_threshold or add masking"
     return                               "❌ BELOW TARGETS — review inference_bridge settings"
 
 
@@ -641,7 +649,7 @@ def cmd_pipeline(args) -> int:
     _print("  AGENT ROUTING DECISIONS")
     _print(_divider())
     _print(f"  PRUNER  → {rd.get('pruner_summary',  'classified chunks')}")
-    _print(f"  GRUG    → TER {result.get('overall_ter', 0):.1f}%  |  RQS-L1 {result.get('rqs_l1_score', 0):.3f}")
+    _print(f"  GRUG    → TER {result.get('overall_ter', 0):.1f}%  |  CCC {result.get('rqs_l1_score', 0):.3f}")
     _print(f"  BALANCER→ Tier {rd.get('tier', 'T0')}  model: {rd.get('model_id') or 'local'}  est. cost: ${rd.get('estimated_cost_usd', 0):.6f}")
     _print(f"  ZIPPY   → history zipped to {rd.get('zipped_tokens', 0)} tokens")
     _print()
@@ -1222,7 +1230,8 @@ examples:
     p_ter.add_argument("--file", required=True, help="source file to analyse")
 
     # rqs
-    p_rqs = sub.add_parser("rqs", help="quality check — RQS-L1 semantic + code overlap")
+    p_rqs = sub.add_parser("rqs", help="consistency check — CCC (Code Consistency Comparison)")
+
     p_rqs.add_argument("--file",  required=True, help="source file to analyse")
     p_rqs.add_argument("--tests", help="pytest test file for L2 functional correctness")
 

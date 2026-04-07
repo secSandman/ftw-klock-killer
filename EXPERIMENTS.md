@@ -11,18 +11,27 @@ The pipeline compresses source code before sending it to an LLM. Two metrics gov
 every decision:
 
 - **TER** (Token Efficiency Ratio) — fraction of tokens removed. Higher = cheaper.
-- **RQS** (Response Quality Score) — how similar the LLM response to compressed code
-  is compared to the response to the full code. Measured as TF cosine similarity. Higher = better.
-- **True Value (TV) = TER × RQS** — the primary optimization target. Both dimensions
-  must be satisfied simultaneously; maximizing one at the expense of the other is a loss.
+- **CCC** (Code Consistency Comparison) — consistency retained after compression. Renamed
+  from "RQS-L1" to accurately describe what it measures. Two versions exist:
+  - **CCC v1 (CSO)** — TF cosine(original_source, compressed_source). Fast, offline, but
+    circular: it measures token survival rate, not response quality. See audit note below.
+  - **CCC v2 / RQS v2** — non-circular. Offline: ROUGE-L(original_interface, compressed).
+    Online (ACTIVE_TIER_MAX>0): ROUGE-L(haiku_response_original, haiku_response_compressed).
+    Enabled with `KLOC_RQS_VERSION=v2`.
+  - **NOTE**: CCC is a CONSISTENCY metric, not a QUALITY metric. A high CCC score means
+    the compressed context produced a similar token distribution. It does NOT mean the
+    answers are correct. See M7 in ROADMAP.md for correctness measurement.
+- **True Value (TV) = TER × CCC** — the primary optimization target in simulation context.
+  Measures compression consistency, not absolute answer quality. Both dimensions must be
+  satisfied simultaneously; maximizing one at the expense of the other is a loss.
 
 Current simulation baseline (Python synthetic corpus):
 
-| Metric | Value |
-|--------|-------|
-| TER | 79.3% |
-| RQS | 0.650 |
-| **TV** | **0.516** |
+| Metric | Value | Notes |
+|--------|-------|-------|
+| TER | 79.3% | Token efficiency ratio |
+| CCC | 0.650 | Code Consistency Comparison (token overlap, not quality) |
+| **TV** | **0.516** | TER × CCC — measures compression consistency |
 
 ---
 
@@ -370,8 +379,9 @@ Run `python experiments/leaderboard.py --diff` to see the live table.
 ### Python Synthetic Corpus
 
 3 boilerplate-heavy CRUD service files. 6,136 original tokens.
+CCC = Code Consistency Comparison (token overlap, not quality).
 
-| Rank | Config | TER | RQS | TV | ΔTV |
+| Rank | Config | TER | CCC | TV | ΔTV |
 |------|--------|-----|-----|----|-----|
 | 1 | `PI_THRESHOLD=0.75` | 60.5% | 0.874 | **0.528** | +2.3% |
 | — | Baseline (default) | 79.3% | 0.650 | 0.516 | — |
@@ -384,8 +394,9 @@ or Bayesian search found a way past it.
 ### C Corpus — `doom/src/strife/p_enemy.c`
 
 11,886-token game AI file. Brace-counting skeleton parser, no libclang.
+CCC = Code Consistency Comparison (token overlap, not quality).
 
-| Rank | Config | TER | RQS | TV | ΔTV |
+| Rank | Config | TER | CCC | TV | ΔTV |
 |------|--------|-----|-----|----|-----|
 | 1 | `CPI_THRESHOLD=0.40` | 54.4% | 0.731 | **0.398** | +27.2% |
 | 2 | `CPI_THRESHOLD=0.50` | 46.1% | 0.797 | 0.367 | +17.3% |
@@ -398,8 +409,9 @@ or Bayesian search found a way past it.
 ### Experimental Strategy Results
 
 Tested on Python synthetic corpus against baseline TV=0.516.
+CCC = Code Consistency Comparison (token overlap, not quality).
 
-| Strategy | Env | TER | RQS | TV | Notes |
+| Strategy | Env | TER | CCC | TV | Notes |
 |----------|-----|-----|-----|----|-------|
 | TF-IDF only | `KLOC_USE_TFIDF_RQS=1` | 79.3% | 0.579 | 0.459 | More accurate, not a regression |
 | Sig retain (15 ids) | `KLOC_SKELETON_SIG_RETAIN=1` | 70.5% | 0.651 | 0.459 | TER overhead dominates |
@@ -415,13 +427,17 @@ are designed for use with real LLM calls (see next steps).
 
 ### Why TV Is Stuck at 0.528
 
-The simulation benchmark measures RQS as TF cosine between original source and
-compressed source. This is a proxy — it does not require an actual LLM call.
-The proxy has a hard ceiling: compressing more tokens always lowers TF overlap.
+The simulation benchmark measures CCC (Code Consistency Comparison) as TF cosine
+between original source and compressed source. This is a proxy — it does not require
+an actual LLM call. The proxy has a hard ceiling: compressing more tokens always
+lowers TF overlap.
 
 Coordinate descent, grid sweep (60 configs), and Bayesian TPE (20 trials) all
 converge to TV=0.528. This is not a local optimum — it is the global maximum
 of TER × TF-cosine(original, compressed) given the current compression strategy.
+
+This is the **structural CCC ceiling**, not a quality ceiling. Breaking 0.528 requires
+moving from CCC (consistency) to a true quality metric. See M7 in ROADMAP.md.
 
 ### Paths to Breaking 0.528
 
@@ -481,3 +497,77 @@ python experiments/bayesian.py \
 # View all results
 python experiments/leaderboard.py --top 30 --diff
 ```
+
+---
+
+## Audit Finding — TV Plateau: Structural Analysis (2026-04-07)
+
+### What was found
+
+Independent audit confirmed that the simulation metric formerly called "RQS-L1" is a
+**circular self-reference**. It has been renamed to **CCC (Code Consistency Comparison)**
+to accurately describe what it measures.
+
+The benchmark called:
+```python
+ccc = compute_ccc(original_source, compressed_source)
+```
+
+`compute_ccc` computes TF cosine similarity between two texts.
+When called with source vs compressed source, it measures **token survival rate** — the
+fraction of the original's token frequencies that remain in the compressed output.
+
+This is structurally anti-correlated with TER:
+- High compression (high TER) → fewer surviving tokens → lower cosine overlap → lower CCC
+- Low compression (low TER) → most tokens survive → high overlap → high CCC
+
+Therefore `True Value = TER × CCC` has a mathematical ceiling regardless of tuning.
+CCC is a consistency metric, not a quality metric.
+
+### Evidence
+
+81 experiments across three independent optimisation strategies all converged to TV ≈ 0.528:
+- Grid sweep (10 combos, pi_quick.json): ceiling 0.528
+- Coordinate descent (optimize.py, pi param): ceiling 0.528
+- Bayesian TPE (20 trials, Optuna): ceiling 0.528
+
+Three different algorithms reaching the same ceiling from different starting points is
+strong evidence of a structural constraint, not a local optimum.
+
+### The fix
+
+`compute_ccc()` (formerly `compute_semantic_similarity`) updated in `src/quality.py`:
+- **Offline path** (default): TF cosine. Fast, no API cost. Circular with TER when
+  applied to source text — but this is now clearly labelled as a consistency check.
+- **Online path** (ACTIVE_TIER_MAX>0 + API key + question): LLM-as-Judge score from
+  `llm_judge()`. Asks the model to rate consistency 1-10, normalised to [0,1].
+  Most meaningful signal when texts are LLM responses, not raw source.
+
+`compute_rqs_v2()` also available in `src/quality.py`:
+- **Offline**: ROUGE-L between the original file's *interface* (function signatures +
+  docstrings only) and the compressed text. Less circular: tests whether the API surface
+  survives, not whether all tokens survive.
+- **Online** (ACTIVE_TIER_MAX>0): Ask T1 Haiku the same question about original AND
+  compressed. ROUGE-L(response_original, response_compressed). Genuinely non-circular.
+
+The old function name is preserved as `compute_semantic_similarity` (alias to `compute_ccc`).
+The old CSO-only path is preserved as `compute_ccc_v1` / `compute_rqs_v1`.
+
+### Env var
+
+```
+KLOC_RQS_VERSION=v1   # default — backward compat, does not invalidate experiment history
+KLOC_RQS_VERSION=v2   # new non-circular metric — offline ROUGE-L or online Haiku
+```
+
+### Implication for prior results
+
+All experiment results in `experiments/results/` used CCC v1.
+The TV values (0.516 baseline, 0.528 best) are **token-survival scores**, not
+quality scores. They should be read as: "at this compression level, X% of the
+original source tokens are still present in the compressed output."
+
+The real-LLM TV values (TV-LLM=0.590 Python, TV-LLM=0.433 C) used `compute_rqs_llm()`
+from `experiments/local_llm.py`, which asks Ollama actual questions and compares
+responses. Those results are non-circular and remain valid. The `rqs_llm` / `RQS-LLM`
+labels are NOT renamed — they are a separate measurement.

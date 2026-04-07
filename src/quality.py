@@ -1,21 +1,26 @@
 """
-quality.py — Inference-Bridge Response Quality Scorer (RQS)
-============================================================
-Measures whether compressed context produces equally good LLM responses
-compared to full context. Runs alongside TER (Token Efficiency Ratio).
+quality.py — Inference-Bridge Code Consistency Comparison (CCC) and Quality Scorer
+====================================================================================
+Measures whether compressed context produces consistent LLM responses compared to
+full context. Runs alongside TER (Token Efficiency Ratio).
 
-The full value equation:
-  True Value = TER (tokens saved) × RQS (quality retained)
+The full value equation (simulation context):
+  True Value = TER (tokens saved) × CCC (compression consistency)
+
+NOTE: CCC (Code Consistency Comparison) is a CONSISTENCY metric, not a quality metric.
+It measures whether two texts (original vs compressed) overlap — it does NOT measure
+whether either answer is correct or helpful. See M7 in ROADMAP.md for the plan to
+move beyond consistency to correctness measurement.
 
 Four measurement layers:
-  L1  Semantic similarity   — embedding cosine similarity, fast, automatic
+  L1  CCC (Code Consistency Comparison) — TF cosine or LLM-as-judge, fast, automatic
   L2  Functional correctness — execute generated code against tests
   L3  LLM-as-judge          — second model scores both responses
   L4  Regression tracker    — longitudinal quality over time
 
 Usage:
   python quality.py --task codegen --file my_module.py --question "add input validation"
-  python quality.py --report                  # show historical RQS trend
+  python quality.py --report                  # show historical CCC trend
   python quality.py --compare full vs bridge  # side-by-side diff
 """
 
@@ -149,35 +154,235 @@ def _cosine_similarity(a: dict, b: dict) -> float:
     return dot / (mag_a * mag_b)
 
 
-def compute_semantic_similarity(response_full: str, response_bridge: str) -> float:
+def compute_ccc(text_a: str, text_b: str, question: str = "") -> float:
     """
-    L1: Semantic similarity between full and bridged responses.
+    CCC — Code Consistency Comparison.
 
-    Uses TF-IDF weighted cosine similarity (KLOC_USE_TFIDF_RQS=1, default on).
-    IDF computed from reference document; down-weights boilerplate like
-    self/return/logger, up-weights rare domain identifiers.
+    Measures whether two texts (typically: LLM response to full context vs
+    LLM response to compressed context) are consistent with each other.
 
-    Range: [0, 1]. Above 0.85 = responses are substantially equivalent.
+    NOTE: This is a CONSISTENCY metric, not a QUALITY metric.
+    A high CCC score means the compressed context produced a similar answer.
+    It does NOT mean either answer is correct or helpful.
 
-    For production: swap this with sentence-transformers embeddings:
-      from sentence_transformers import SentenceTransformer
-      model = SentenceTransformer('all-MiniLM-L6-v2')
-      emb_full = model.encode(response_full)
-      emb_bridge = model.encode(response_bridge)
-      return float(np.dot(emb_full, emb_bridge) /
-                   (np.linalg.norm(emb_full) * np.linalg.norm(emb_bridge)))
+    Online path  (ACTIVE_TIER_MAX > 0 + API key + question):  LLM-as-Judge score
+                 from llm_judge() — asks the model to rate consistency 1-10,
+                 normalised to [0, 1]. Most meaningful signal.
+    Offline path (ACTIVE_TIER_MAX = 0 or no key or no question):
+                 TF cosine similarity between the two texts. Fast, no API cost,
+                 but circular when texts are source code rather than LLM responses.
+
+    See ROADMAP.md M7 — True Quality Measurement for the plan to move
+    beyond consistency to correctness measurement.
     """
-    tf_full   = _tokenize_simple(response_full)
-    tf_bridge = _tokenize_simple(response_bridge)
+    tier_max = int(os.environ.get("ACTIVE_TIER_MAX", "0"))
+    key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY")
 
+    if tier_max > 0 and key and question:
+        score, _ = llm_judge(question, text_a, text_b)
+        if score >= 0:
+            return score
+
+    # Offline fallback: TF cosine
+    tf_a = _tokenize_simple(text_a)
+    tf_b = _tokenize_simple(text_b)
     use_tfidf = os.environ.get("KLOC_USE_TFIDF_RQS", "0") == "1"
     if use_tfidf:
-        idf = _build_idf(tf_full)
-        vec_full   = _apply_tfidf(tf_full,   idf)
-        vec_bridge = _apply_tfidf(tf_bridge, idf)
-        return round(_cosine_similarity(vec_full, vec_bridge), 4)
+        idf = _build_idf(tf_a)
+        return round(_cosine_similarity(_apply_tfidf(tf_a, idf), _apply_tfidf(tf_b, idf)), 4)
+    return round(_cosine_similarity(tf_a, tf_b), 4)
 
-    return round(_cosine_similarity(tf_full, tf_bridge), 4)
+
+def _compute_ccc_tf_cosine(text_a: str, text_b: str) -> float:
+    """
+    CCC v1 — pure TF-cosine path (offline only, ignores ACTIVE_TIER_MAX).
+
+    Use this in tests or benchmarks that need the offline signal regardless of
+    environment, or when comparing against historical experiment results.
+    """
+    tf_a = _tokenize_simple(text_a)
+    tf_b = _tokenize_simple(text_b)
+    use_tfidf = os.environ.get("KLOC_USE_TFIDF_RQS", "0") == "1"
+    if use_tfidf:
+        idf = _build_idf(tf_a)
+        return round(_cosine_similarity(_apply_tfidf(tf_a, idf), _apply_tfidf(tf_b, idf)), 4)
+    return round(_cosine_similarity(tf_a, tf_b), 4)
+
+
+# Backward compat alias — keeps old call sites working without change
+compute_semantic_similarity = compute_ccc
+
+# Explicit pure-TF-cosine alias for tests that need the offline signal regardless of env
+compute_ccc_v1 = _compute_ccc_tf_cosine
+
+# Alias: old name kept for backward compat; clearly labelled CSO (Compressed Source Overlap)
+compute_rqs_v1 = _compute_ccc_tf_cosine
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RQS v2 — non-circular quality measurement
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# AUDIT FINDING (2026-04-07): compute_semantic_similarity() was being called in
+# the benchmark as compute_semantic_similarity(source, compressed) — comparing
+# compressed source text to original source text.  This is a circular metric:
+# higher compression (TER) → fewer surviving tokens → lower overlap → lower RQS.
+# True Value = TER × RQS therefore plateaus at ~0.528 regardless of tuning.
+# 81 experiments across three optimisers confirmed this is a structural ceiling,
+# not a local optimum.  See EXPERIMENTS.md §"TV Plateau — Structural Analysis".
+#
+# v2 design:
+#   Offline  (ACTIVE_TIER_MAX=0):  ROUGE-L between the original's critical
+#            interface (function signatures + first docstring line) and the
+#            compressed text.  Tests whether the *important* parts survive, not
+#            all tokens.  Still simulation-only; establishes a fairer floor.
+#   Online   (ACTIVE_TIER_MAX>0 + API key):  ask T1 Haiku the same question
+#            about original AND compressed.  ROUGE-L(response_full, response_bridge).
+#            This is the only non-circular quality signal.
+#
+# Controlled by KLOC_RQS_VERSION=v1|v2  (default v1, backward compat).
+#
+
+
+def _rouge_l(reference: str, candidate: str) -> float:
+    """
+    ROUGE-L: LCS-recall of reference token sequence in candidate.
+    Pure Python, no deps.  Range [0, 1].
+    """
+    ref = re.findall(r"[a-zA-Z_]\w*|[0-9]+", reference.lower())
+    can = re.findall(r"[a-zA-Z_]\w*|[0-9]+", candidate.lower())
+    if not ref or not can:
+        return 0.0
+    # LCS length via DP
+    m, n = len(ref), len(can)
+    # Space-efficient: two rows
+    prev = [0] * (n + 1)
+    curr = [0] * (n + 1)
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if ref[i - 1] == can[j - 1]:
+                curr[j] = prev[j - 1] + 1
+            else:
+                curr[j] = max(curr[j - 1], prev[j])
+        prev, curr = curr, [0] * (n + 1)
+    lcs = prev[n]
+    precision = lcs / n if n else 0.0
+    recall    = lcs / m if m else 0.0
+    if precision + recall == 0:
+        return 0.0
+    return round(2 * precision * recall / (precision + recall), 4)  # F1
+
+
+def _extract_interface(source: str) -> str:
+    """
+    Extract the critical interface of a source file: function/method signatures
+    and the first line of each docstring.  This is what an LLM needs to answer
+    questions about a module's API — it's a non-circular reference because it
+    focuses on *what the code exposes*, not the full token set.
+    """
+    lines = source.splitlines()
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        # Function / method / class definition
+        if re.match(r"^(def |class |async def )", stripped):
+            out.append(stripped)
+            # Grab first docstring line if next non-empty line is a triple-quote
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j < len(lines):
+                next_s = lines[j].strip()
+                if next_s.startswith('"""') or next_s.startswith("'''"):
+                    # One-liner docstring
+                    inner = next_s.strip('"\' ')
+                    if inner:
+                        out.append(f"  # {inner[:120]}")
+        i += 1
+    return "\n".join(out) if out else source[:500]
+
+
+def compute_rqs_v2(
+    original: str,
+    compressed: str,
+    question: str = "",
+    api_key: Optional[str] = None,
+    model: str = "claude-haiku-4-5-20251001",
+) -> float:
+    """
+    RQS v2 — non-circular quality score.
+
+    Offline path (ACTIVE_TIER_MAX=0 or no API key):
+      ROUGE-L between the original's interface (signatures + docstrings)
+      and the compressed text.  Asks: "do the critical API surfaces survive?"
+      Less circular than v1 because the reference is the *interface*, not
+      the full token set; still a simulation approximation.
+
+    Online path (ACTIVE_TIER_MAX>0 and API key available):
+      Ask T1 Haiku the same question against original AND compressed context.
+      ROUGE-L(response_original, response_compressed).
+      This is the only truly non-circular signal: measures whether the LLM
+      produces equivalent answers, not whether tokens survived.
+
+    Returns a float in [0.0, 1.0].  Falls back to offline gracefully.
+    """
+    tier_max = int(os.environ.get("ACTIVE_TIER_MAX", "0"))
+    key = api_key or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY")
+
+    if tier_max > 0 and key:
+        # Online path: compare actual LLM responses
+        q = question or "Describe what this code does and list the key functions."
+        try:
+            import urllib.request
+
+            def _ask(ctx: str) -> str:
+                payload = json.dumps({
+                    "model": model,
+                    "max_tokens": 512,
+                    "messages": [{"role": "user", "content": f"{q}\n\n```\n{ctx[:3000]}\n```"}],
+                }).encode()
+                req = urllib.request.Request(
+                    "https://api.anthropic.com/v1/messages",
+                    data=payload,
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-api-key": key,
+                        "anthropic-version": "2023-06-01",
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    data = json.loads(r.read())
+                    return data["content"][0]["text"].strip()
+
+            resp_orig = _ask(original)
+            resp_comp = _ask(compressed)
+            return _rouge_l(resp_orig, resp_comp)
+        except Exception:
+            pass  # Fall through to offline path
+
+    # Offline path: ROUGE-L(interface, compressed)
+    interface = _extract_interface(original)
+    return _rouge_l(interface, compressed)
+
+
+def rqs(
+    original: str,
+    compressed: str,
+    question: str = "",
+    api_key: Optional[str] = None,
+) -> float:
+    """
+    Route to compute_rqs_v1 or compute_rqs_v2 based on KLOC_RQS_VERSION env var.
+    Default: v1 (backward compat — does not invalidate experiment history).
+    Set KLOC_RQS_VERSION=v2 to use the non-circular metric.
+    """
+    version = os.environ.get("KLOC_RQS_VERSION", "v1")
+    if version == "v2":
+        return compute_rqs_v2(original, compressed, question=question, api_key=api_key)
+    # v1: CCC / CSO — Compressed Source Overlap (legacy, circular with TER)
+    return compute_ccc(original, compressed, question=question)
 
 
 def compute_code_overlap(response_full: str, response_bridge: str) -> float:
@@ -568,8 +773,8 @@ def evaluate(
 
     ter = (1 - bridge_tokens / full_tokens) * 100 if full_tokens > 0 else 0.0
 
-    # L1: Semantic similarity
-    semantic = compute_semantic_similarity(response_full, response_bridge)
+    # L1: CCC — Code Consistency Comparison
+    semantic = compute_ccc(response_full, response_bridge, question=question)
     code_overlap = compute_code_overlap(response_full, response_bridge)
 
     # L2: Functional correctness

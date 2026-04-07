@@ -136,8 +136,8 @@ sequenceDiagram
     end
 
     GR->>GR: Synonym pass (initialization→init etc.)
-    GR->>GR: RQS-L1 inline check (cosine similarity)
-    GR->>O: compressed_chunks + TER + RQS-L1
+    GR->>GR: CCC inline check (cosine consistency)
+    GR->>O: compressed_chunks + TER + CCC
 ```
 
 ![InferenceBridge Pipeline](imgs/inferencebridging-proposal.png)
@@ -322,12 +322,12 @@ flowchart LR
         T["TER = 1 − (tokens_after / tokens_before)\ncurrent baseline: 85.4%\nfloor: 85%  |  C target: 40%"]
     end
 
-    subgraph RQS["Response Quality Score"]
-        R["RQS = weighted composite of:\nL1 semantic similarity  ×0.6\nL1 code overlap         ×0.4\nL2 functional tests     (optional)\nL3 LLM-as-judge         (optional)\nfloor: 0.85"]
+    subgraph CCC["Code Consistency Comparison (CCC)"]
+        R["CCC = weighted composite of:\nL1 token overlap (TF cosine)  ×0.6\nL1 code overlap               ×0.4\nL2 functional tests     (optional)\nL3 LLM-as-judge         (optional)\nfloor: 0.85\nNOTE: consistency metric, not quality metric"]
     end
 
-    subgraph TV["True Value"]
-        V["True Value = TER × RQS\nexample: 0.854 × 0.912 = 0.779\n\n1.0 = perfect compression + zero quality loss\n0.5 = you are wasting either tokens or quality\n0.0 = either useless or broken"]
+    subgraph TV["True Value (simulation)"]
+        V["True Value = TER × CCC\nexample: 0.854 × 0.912 = 0.779\n\nMeasures compression consistency, not answer correctness.\n1.0 = max compression + max token consistency\n0.5 = you are wasting either tokens or consistency\nSee M7 in ROADMAP.md for correctness measurement"]
     end
 
     TER --> TV
@@ -840,7 +840,7 @@ authentication → auth
 repository     → repo
 ```
 
-Inline quality check: **RQS-L1** (cosine similarity between original and compressed). If it drops below 0.80, BALANCER is notified to consider escalation.
+Inline consistency check: **CCC** (Code Consistency Comparison — cosine similarity between original and compressed). If it drops below 0.80, BALANCER is notified to consider escalation.
 
 ### BALANCER — Never Over-Kill
 

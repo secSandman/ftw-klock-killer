@@ -15,10 +15,16 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import os
 import re
 import sys
 import tempfile
 from pathlib import Path
+
+# Single source of truth for the acceptance threshold.
+# Override with KLOC_BASELINE_TER env var (e.g. after a confirmed improvement).
+# 79.3 = default-config baseline (PI_THRESHOLD=0.70, synthetic corpus).
+BASELINE_TER: float = float(os.environ.get("KLOC_BASELINE_TER", "79.3"))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Synthetic test corpus (3 boilerplate-heavy Python source files that
@@ -879,7 +885,6 @@ def run_synthetic_benchmark() -> bool:
         print(f"  Data loss: {'0%' if passed == n_files else 'DETECTED'} "
               f"{'✓' if passed == n_files else '✗'}")
 
-        BASELINE_TER = 77.9   # accepted baseline; 80.0 is the stretch target
         target_met   = overall_pct >= BASELINE_TER
         bijection_ok = passed == n_files
 
@@ -889,7 +894,7 @@ def run_synthetic_benchmark() -> bool:
             print("  ALL CHECKS PASSED ✓")
         else:
             if not target_met:
-                print(f"  ✗ Token reduction NOT met: {overall_pct:.1f}% < 80%")
+                print(f"  ✗ Token reduction NOT met: {overall_pct:.1f}% < {BASELINE_TER}%")
             if not bijection_ok:
                 print(f"  ✗ RHD bijection FAILED: {passed}/{n_files} lossless")
         print("─" * 60 + "\n")
