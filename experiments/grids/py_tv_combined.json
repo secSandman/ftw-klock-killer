@@ -1,0 +1,7 @@
+{
+  "_doc": "Python combined TER×CCC sweep — PI threshold × loop-free bonus × F4 vowel prune. 6×3×3 = 54 combos. ~90s at 6 workers.",
+  "_corpus": "synthetic",
+  "KLOC_PI_THRESHOLD":         [0.55, 0.60, 0.65, 0.70, 0.75, 0.80],
+  "KLOC_PI_LOOP_FREE_BONUS":   [0.05, 0.10, 0.15],
+  "KLOC_F4_VOWEL_PRUNE_MIN_LEN": [4, 5, 6]
+}

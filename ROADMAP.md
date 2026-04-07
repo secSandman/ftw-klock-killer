@@ -1,6 +1,6 @@
 # FTW-KLOC-KILLER — Feature Roadmap
 
-> Last updated: 2026-04-06
+> Last updated: 2026-04-07
 > Owner: txsan
 > Core metric: **TER × CCC ≥ 0.85** (True Value — compression consistency) at every layer
 > NOTE: CCC (Code Consistency Comparison) measures token overlap, not answer correctness.
@@ -12,15 +12,20 @@
 
 | Language | File | TER | CCC | True Value | Status |
 |----------|------|-----|-----|------------|--------|
-| Python   | synthetic corpus | 77.9% | — | — | ✅ passing, below 80% target |
-| C/C++    | doom/p_enemy.c | 35.0% | 0.862 | 0.3017 | ✅ algorithms verified |
+| Python   | synthetic corpus | 79.3% | 0.650 | 0.516 | ✅ baseline; TV ceiling 0.529 confirmed (248 experiments) |
+| C/C++    | doom/p_enemy.c | 54.4% | 0.753 | **0.410** | ✅ Bayesian optimized; CPI=0.35, F4=8 |
 | Go       | — | — | — | — | ⬜ parser built, no benchmark |
 | Rust     | — | — | — | — | ⬜ parser built, no benchmark |
 
+**Optimized configs (2026-04-07, 248 experiments):**
+- Python best TV: `PI_THRESHOLD=0.75, F4_VOWEL_PRUNE_MIN_LEN=8` → TV=0.529
+- Python best TV×TIME: `PI_THRESHOLD=0.70, F4_VOWEL_PRUNE_MIN_LEN=8` → TV×T=0.577
+- C best TV: `CPI_THRESHOLD=0.35, CPI_BOILERPLATE_BONUS=0.15, CPI_LOOP_FREE_BONUS=0.10, CPM_KQ_THRESHOLD=3, F4_VOWEL_PRUNE_MIN_LEN=8` → TV=0.410 (+31% vs default)
+
 **Known regressions / open bugs:**
 - ISSUE-002: Post-inference CCC cascade not implemented (consistency checked pre-send only)
-- ISSUE-003: `[§:hash]` placeholders not unmasked in LLM responses
-- ISSUE-004: Bus JSONL rotation/compaction not implemented (files grow unbounded)
+- ISSUE-003: `[§:hash]` placeholders not unmasked in LLM responses — ✅ FIXED in llm_caller
+- ISSUE-004: Bus JSONL rotation/compaction not implemented — ✅ FIXED (ROTATION_LINE_LIMIT=10k)
 
 ---
 
@@ -92,7 +97,7 @@ This requires running a batch of real queries end-to-end and tracking which tier
 | ID | Feature | Success Criteria | Expected Result |
 |----|---------|-----------------|-----------------|
 | TER-001 | Expand `user_service.py` non-loop functions by ~7 lines each | `benchmark --mode synthetic` returns TER ≥ 80.0% | 80%+ TER, True Value > 0.68 |
-| TER-002 | C TER target: reach 40% on real Doom code | `report-c --file doom/src/strife/p_enemy.c` TER ≥ 40% | Requires better skeleton detection on K&R-style functions |
+| TER-002 | C TER target: reach 40% on real Doom code | `report-c --file doom/src/strife/p_enemy.c` TER ≥ 40% | ✅ **DONE** — TER=54.4% at CPI_THRESHOLD=0.35; TV=0.410 |
 | TER-003 | F3 masking: token-aware pattern expansion | Masking never increases token count (no negative savings) | Already fixed; add regression test |
 
 ---

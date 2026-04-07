@@ -388,15 +388,15 @@ def _parse_metrics(stdout: str, corpus: str) -> dict:
             metrics.setdefault("tokens_after_skeleton", _extract_int(line))
             if "%" in line:
                 metrics.setdefault("ter_skeleton_pct", _extract_pct(line))
-        if "Mean RQS-L1" in line:
+        if "Mean RQS-L1" in line or "Mean CCC" in line:
             metrics["rqs_l1"] = _extract_float(line)
         if "True Value" in line and ("x" in line.lower() or "×" in line):
-            # Format: "True Value = TER × RQS = 0.793 × 0.650 = 0.516" → last float
+            # Format: "True Value (TER × CCC) = 0.793 × 0.650 = 0.516" → last float
             metrics["true_value"] = _extract_last_float(line)
         # C report-c benchmark
         if "TOTAL TER" in line:
             metrics["c_ter_pct"] = _extract_pct(line)
-        if "RQS-L1" in line and "threshold" in line:
+        if ("RQS-L1" in line or "CCC" in line) and "threshold" in line:
             metrics.setdefault("c_rqs_l1", _extract_float(line))
         # Generic TER line from synthetic
         if line.strip().startswith("After caveman:") or "After masking:" in line:

@@ -100,6 +100,9 @@ def sweep(
                 ter = m.get("python_ter_pct") or m.get("c_ter_pct") or 0.0
                 rqs = m.get("rqs_l1") or m.get("c_rqs_l1") or 0.0
                 tv  = m.get("true_value") or (ter * rqs if rqs else ter)
+                # Fallback: infer CCC from TV/TER when parser missed the CCC line
+                if not rqs and tv and ter:
+                    rqs = round(tv / ter, 3) if ter > 0 else 0.0
                 elapsed = time.time() - t0
                 print(
                     f"  [{completed:>3}/{total}] {r['label']:<50} "

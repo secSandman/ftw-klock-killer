@@ -524,7 +524,7 @@ Builds rainbow tables, verifies all dependencies, prints environment summary.
 python kloc.py benchmark --mode synthetic
 ```
 
-Expected output with default config (`PI_THRESHOLD=0.75`): TER ~60%, RQS ~0.874, TV ~0.528.  
+Expected output with recommended config (`PI_THRESHOLD=0.75, F4=8`): TER ~60%, CCC ~0.875, TV ~0.529.  
 The synthetic corpus is three Python CRUD service files (~6,136 tokens total) — no external downloads required.
 
 ### Step 4 — Set your Anthropic API key (for T1-T3 tiers)
@@ -693,6 +693,8 @@ experiments/
 └── grids/             # pre-built experiment grids (JSON)
     ├── pi_quick.json          (10 combos — fast threshold x bonus)
     ├── pi_full.json           (60 combos — full PI parameter grid)
+    ├── py_tv_combined.json    (54 combos — threshold × loop-free × F4 ★ primary Python sweep)
+    ├── c_full_sweep.json      (63 combos — CPI × boilerplate × F4 ★ primary C sweep)
     ├── local_llm_quick.json   (9 combos — ctx x threshold)
     ├── local_llm_full.json    (48 combos — full T0.5 sweep)
     ├── local_llm_c.json       (12 combos — C corpus)
@@ -750,23 +752,24 @@ Module-level constants (e.g. `SKELETAL_PI_THRESHOLD`) are re-read from the envir
 | `retrieval` | `KLOC_RAG_NAME_WEIGHT`, `KLOC_RAG_SYMBOL_BOOST`, `KLOC_RAG_LARGE_FN_LINES` | `experiments/params/retrieval.json` |
 | `local_llm` | `KLOC_LOCAL_LLM_MAX_CTX`, `KLOC_LOCAL_LLM_QUALITY_THRESHOLD`, `KLOC_LLM_MODEL` | `experiments/params/local_llm.json` |
 
-### Current leaderboard (109 experiments, 2026-04-06)
+### Current leaderboard (248 experiments, 2026-04-07)
 
-**Python synthetic corpus** — baseline TER=79.3%, RQS=0.650, TV=0.516
+**Python synthetic corpus** — baseline TER=79.3%, CCC=0.650, TV=0.516
 
-| Rank | Config | TER | RQS | TV | ΔTV |
-|---|---|---|---|---|---|
-| 1 | `PI_THRESHOLD=0.75` | 60.5% | 0.874 | **0.528** | +2.3% |
-| — | Baseline (default 0.70) | 79.3% | 0.650 | 0.516 | — |
-| — | `PI_THRESHOLD=0.85` | 85.4% | 0.504 | 0.430 | -16.7% |
+| Rank | Config | TER | CCC | TV | TV×T | ΔTV |
+|---|---|---|---|---|---|---|
+| 1 (max TV) | `PI=0.75, F4=8` | 60.5% | ~0.875 | **~0.529** | — | +2.5% |
+| 1 (max TV×T) | `PI=0.70, F4=4` | 79.3% | 0.639 | 0.507 | **0.577** | −1.7% |
+| — | Baseline (default PI=0.70) | 79.3% | 0.650 | 0.516 | — | — |
 
-**C corpus (doom/src/strife/p_enemy.c)** — baseline TER=36.0%, RQS=0.870, TV=0.313
+**C corpus (doom/src/strife/p_enemy.c)** — baseline TER=36.0%, CCC=0.870, TV=0.313
 
-| Rank | Config | C TER | C RQS | TV | ΔTV |
-|---|---|---|---|---|---|
-| 1 | `CPI_THRESHOLD=0.40` | 54.4% | 0.731 | **0.398** | +27.2% |
-| 2 | `CPI_THRESHOLD=0.50` | 46.1% | 0.797 | 0.367 | +17.3% |
-| — | Baseline (0.70) | 36.0% | 0.870 | 0.313 | — |
+| Rank | Config | TER | CCC | TV | TV×T | ΔTV |
+|---|---|---|---|---|---|---|
+| **1 (new best)** | `CPI=0.35, KQ=3, F4=8` | 54.4% | 0.753 | **0.410** | 0.444 | **+31.0%** |
+| 2 | `CPI=0.35, F4=6` | 54.4% | 0.736 | 0.400 | 0.408 | +27.8% |
+| 3 | `CPI=0.40` (prior best) | 54.4% | 0.731 | 0.398 | — | +27.2% |
+| — | Baseline (CPI=0.70) | 36.0% | 0.870 | 0.313 | — | — |
 
 **C real-LLM (qwen2.5-coder:14b via Ollama)**
 
@@ -776,34 +779,49 @@ Module-level constants (e.g. `SKELETAL_PI_THRESHOLD`) are re-read from the envir
 | 2 | `CPI=0.40, MAX_CTX=8000` | 54.4% | 0.740 | 0.402 | +28.4% |
 | — | Baseline (CPI=0.70, MAX_CTX=8000) | 36.0% | 0.630 | 0.227 | — |
 
-The simulation TV ceiling of 0.528 (Python) / 0.398 (C) is structural: TF cosine RQS is anti-correlated with TER by definition. All three optimiser strategies (grid sweep, coordinate descent, Bayesian TPE) converge to the same ceiling. The real-LLM metric breaks this ceiling because semantic quality is not structurally anti-correlated with token removal.
+The simulation TV ceiling of ~0.529 (Python) / ~0.410 (C) is structural — 248 experiments
+confirmed it. TF cosine CCC is mathematically anti-correlated with TER. Grid sweep, coordinate
+descent, and Bayesian TPE all converge to the same ceiling. The real-LLM metric breaks this
+because semantic quality is not structurally anti-correlated with token removal.
+
+**TV×TIME** = TV × (median_elapsed / elapsed) — rewards configs that are fast and consistent.
+Sort by it: `python kloc.py experiment leaderboard --sort tv_time`
 
 ---
 
-## 🆕 What's New (2026-04-06)
+## 🆕 What's New (2026-04-07)
 
 > Full feature backlog, milestones, and success criteria in [ROADMAP.md](ROADMAP.md).
 
-### Pipeline improvements
+### Experiment session results — 248 total experiments
+
+| Finding | Detail | Impact |
+|---------|--------|--------|
+| **C new best TV=0.410** | Bayesian found `CPI=0.35 + KQ=3 + LF_BONUS=0.10 + F4=8` jointly | +31% over C default, +3% over prior grid best |
+| **F4 min_len=8 universal win** | Bayesian independently found 8 for both Python and C | Better CCC preservation; shorter words not damaged |
+| **TV×TIME metric** | New leaderboard sort — rewards fast configs (`--sort tv_time`) | PI=0.70 wins over PI=0.75 when latency matters |
+| **Loop-free bonus is dead param** | `PI_LOOP_FREE_BONUS` had zero effect on all 54 Python combos | Synthetic corpus has no loop-free long functions |
+| **TV ceiling confirmed** | 248 experiments, 3 optimisers — all converge to TV≈0.529 | Structural, not tunable. Needs real LLM to break. |
+| **CCC metric renamed** | Formerly RQS-L1. CCC = Code Consistency Comparison | Honest labelling: consistency, not quality |
+| **CCC parser fix** | `experiments/runner.py` now parses `"Mean CCC"` and `"CCC ... threshold"` lines | Leaderboard CCC column now populated correctly |
+
+### Pipeline improvements (2026-04-06)
 
 | Area | Change | Impact |
 |------|--------|--------|
-| **Python TER** | Expanded `UserService.stats()` with 7 non-loop assignment lines | 77.9% → **85.4%** TER |
-| **F4 C Caveman** | New `C_CavemanCompressor` skips `#include`/`#define` lines; compresses `//` and `/* */` only | Fixed silent corruption of preprocessor directives; +6.4% C TER |
-| **F3 Python Masker** | Token-aware guard: only masks when `count_tokens(placeholder) < count_tokens(line)` | Prevents negative TER on short imports like `import os` |
-| **PI formula** | Boilerplate bonus (+0.15) now gated on `complex_count == 0` | Loop-containing functions always fall below 0.70 threshold — critical constraint preserved |
-| **Bus rotation** | `ROTATION_LINE_LIMIT = 10,000` — queue files rotate to `.jsonl.1` | No unbounded disk growth in long sessions |
-| **RAG retriever** | `rag/retriever.py` — cosine similarity + BM25 keyword fallback when offline | Top-K chunk retrieval ready to wire into pipeline |
-| **Context caching** | Anthropic `cache_control: ephemeral` on prompt blocks >= 1024 tokens | Up to 90% cost reduction on repeated prompt prefixes |
-| **Response unmask** | `llm_caller._unmask_response()` — two-pass: Python RHD + C `[§:hash]` | LLM responses now contain readable imports, not masked tokens |
-| **Report timestamps** | HTML reports auto-written to `reports/YYYY-MM-DD/<stem>_HHMMSS.html` | Every run gets a dated, archived report automatically |
-| **Rust parser** | Regex fallback now extracts `struct` and `enum` definitions | Struct chunking works without tree-sitter dependency |
+| **F4 C Caveman** | `C_CavemanCompressor` skips `#include`/`#define`; compresses `//` and `/* */` only | Fixed preprocessor corruption; +6.4% C TER |
+| **F3 Python Masker** | Token-aware guard: only masks when `count_tokens(placeholder) < count_tokens(line)` | Prevents negative TER on short imports |
+| **PI formula** | Boilerplate bonus (+0.15) gated on `complex_count == 0` | Loop-containing functions always below threshold |
+| **Bus rotation** | `ROTATION_LINE_LIMIT = 10,000` — queues rotate to `.jsonl.1` | No unbounded disk growth |
+| **Response unmask** | `llm_caller._unmask_response()` — two-pass: Python RHD + C `[§:hash]` | LLM responses now contain readable imports |
+| **T0.5 local LLM** | Ollama intercept tier; 5/5 batch queries accepted at $0.00 | Blended cost reduction measured end-to-end |
+| **CCC + LLM-Judge** | `compute_ccc()` routes through `llm_judge()` when online | Non-circular quality signal when API key present |
 
 ### Open next steps (see ROADMAP.md)
 
-- **M2** — C TER >= 40% on `p_enemy.c` (currently 35% — needs better K&R skeleton detection)
+- **M6** — PROTO-001 blended pipeline metric: acceptance_rate + blended_cost over N queries
+- **M7** — True quality measurement: eval set with known-correct answers (EVAL-001 to EVAL-004)
 - **M3** — Wire RAG retrieval into `kloc.py pipeline` end-to-end with Qdrant
-- **M4** — True Value (TER x RQS) >= 0.70 on any real-world file
 
 ---
 

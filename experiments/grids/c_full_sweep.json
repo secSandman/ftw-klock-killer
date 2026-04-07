@@ -1,0 +1,8 @@
+{
+  "_doc": "C corpus full sweep — CPI threshold × boilerplate bonus × F4 vowel prune. 7×3×3 = 63 combos. ~180s at 6 workers.",
+  "_corpus": "doom/src/strife/p_enemy.c",
+  "_repo": "doom/",
+  "KLOC_CPI_THRESHOLD":           [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60],
+  "KLOC_CPI_BOILERPLATE_BONUS":   [0.15, 0.20, 0.25],
+  "KLOC_F4_VOWEL_PRUNE_MIN_LEN":  [4, 5, 6]
+}

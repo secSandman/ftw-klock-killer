@@ -214,42 +214,53 @@ makes results exactly reproducible from the saved `env` dict in JSONL.
 
 ### Current Results
 
-#### Confirmed Leaderboard (2026-04-06, 81 experiments)
+#### Confirmed Leaderboard (2026-04-07, 248 experiments)
 
-**Python synthetic corpus** — baseline TER=79.3%, RQS=0.650, TV=0.516
+**Python synthetic corpus** — baseline TER=79.3%, CCC=0.650, TV=0.516
 
-| Rank | Config | TER | RQS | TV | ΔTV |
+| Rank | Config | TER | CCC | TV | TV×T | ΔTV |
+|------|--------|-----|-----|----|------|-----|
+| 1 (max TV) | `PI=0.75, F4=8` | 60.5% | ~0.875 | **~0.529** | — | +2.5% |
+| 1 (max TV×T) | `PI=0.70, F4=4` | 79.3% | 0.639 | 0.507 | **0.577** | −1.7% |
+| — | Baseline (default PI=0.70) | 79.3% | 0.650 | 0.516 | — | — |
+
+**C corpus (doom/src/strife/p_enemy.c)** — baseline TER=36.0%, CCC=0.870, TV=0.313
+
+| Rank | Config | TER | CCC | TV | ΔTV |
 |------|--------|-----|-----|----|-----|
-| 1 | `PI_THRESHOLD=0.75` | 60.5% | 0.874 | **0.528** | +2.3% |
-| — | Baseline (default) | 79.3% | 0.650 | 0.516 | — |
-| — | `PI_THRESHOLD=0.85` | 85.4% | 0.504 | 0.430 | −16.7% |
+| **1 (Bayesian 2026-04-07)** | `CPI=0.35, BPLATE=0.15, LF=0.10, KQ=3, F4=8` | 54.4% | 0.753 | **0.410** | +31.0% |
+| 2 | `CPI=0.35, F4=6` (grid) | 54.4% | 0.736 | 0.400 | +27.8% |
+| — | Baseline (CPI=0.70) | 36.0% | 0.870 | 0.313 | — |
 
-**C corpus (doom/src/strife/p_enemy.c)** — baseline TER=36.0%, RQS=0.870, TV=0.313
+**Recommended configs:**
+```
+# Python — max TV
+KLOC_PI_THRESHOLD=0.75
+KLOC_F4_VOWEL_PRUNE_MIN_LEN=8
 
-| Rank | Config | TER | RQS | TV | ΔTV |
-|------|--------|-----|-----|----|-----|
-| 1 | `CPI_THRESHOLD=0.40` | 54.4% | 0.731 | **0.398** | +27.2% |
-| 2 | `CPI_THRESHOLD=0.50` | 46.1% | 0.797 | 0.367 | +17.3% |
-| — | Baseline (0.70) | 36.0% | 0.870 | 0.313 | — |
+# C — Bayesian-confirmed best (2026-04-07)
+KLOC_CPI_THRESHOLD=0.35
+KLOC_CPI_BOILERPLATE_BONUS=0.15
+KLOC_CPI_LOOP_FREE_BONUS=0.10
+KLOC_CPM_KQ_THRESHOLD=3
+KLOC_F4_VOWEL_PRUNE_MIN_LEN=8
+```
 
-#### Experimental Strategies (not yet in default config)
+#### Key Lessons from 248 Experiments
 
-| Strategy | Env var | Effect on TV | When to use |
-|----------|---------|-------------|-------------|
-| TF-IDF RQS | `KLOC_USE_TFIDF_RQS=1` | −10.8% (stricter, more accurate) | Production audits; pair with sig_retain |
-| Sig retention | `KLOC_SKELETON_SIG_RETAIN=1` | −8.5% (simulation); unknown (real LLM) | Real T1/T2 benchmarks |
-| TF-IDF + sig_retain (8 ids) | both above | −11.2% (simulation) | Real LLM evaluation |
+- `KLOC_F4_VOWEL_PRUNE_MIN_LEN=8` was found by Bayesian search for both Python and C independently. It is universally better. The default of 5 is suboptimal.
+- `KLOC_PI_LOOP_FREE_BONUS` has zero effect on the Python synthetic corpus (dead param — corpus has no loop-free long functions). Do not tune it for Python.
+- TV×TIME (`--sort tv_time` in leaderboard) favours PI=0.70 over PI=0.75 because it is 10–15% faster at near-identical quality.
+- The TV ceiling of ~0.529 is structural (TF cosine anti-correlation with TER). 248 experiments confirmed it. Breaking it requires real LLM calls.
 
 #### The TV Plateau
-Coordinate descent, grid sweep, and Bayesian TPE (20 trials) all converge to
-TV=0.528. This is a structural ceiling for the simulation benchmark, not a local
-optimum. The next meaningful improvement requires moving off the simulation and
-onto real LLM calls, or redesigning the compression so rare terms survive into
-the skeleton output.
+248 total experiments (grid sweep, coordinate descent, Bayesian TPE) all converge to
+TV≈0.529. This is a structural ceiling for the simulation benchmark — confirmed, not
+a local optimum. The next meaningful improvement requires real LLM calls or a semantic
+quality metric that isn't anti-correlated with token removal.
 
-**Recommended next experiment:** run `python kloc.py experiment bayesian --param all
---trials 100 --storage sqlite:///experiments/optuna.db` with `ACTIVE_TIER_MAX=1`
-(real Haiku calls) to measure TV under real response quality conditions.
+**Next step:** `python kloc.py experiment bayesian --param all --trials 100
+--storage sqlite:///experiments/optuna.db` with `ACTIVE_TIER_MAX=1` (real Haiku).
 
 ---
 

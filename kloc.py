@@ -961,7 +961,8 @@ def cmd_experiment(args) -> int:
             type_filter  = getattr(args, "type", "all"),
         )
         _print(f"\n  EXPERIMENT LEADERBOARD  ({len(results)} total)\n")
-        print_leaderboard(results, top=args.top, show_diff=args.diff)
+        print_leaderboard(results, top=args.top, show_diff=args.diff,
+                          sort_by=getattr(args, "sort", "tv"))
 
     elif exp_cmd == "run":
         from experiments.runner import run_experiment
@@ -1307,6 +1308,8 @@ examples:
     p_lb.add_argument("--diff",  action="store_true")
     p_lb.add_argument("--type",  default="all", choices=["all", "sim", "llm"],
                       help="Show all/sim-only/llm-only results")
+    p_lb.add_argument("--sort",  default="tv", choices=["tv", "tv_time", "ter", "ccc"],
+                      help="Sort by tv (default), tv_time (TER×CCC×speed), ter, ccc")
 
     p_opt = p_exp_sub.add_parser("optimize", help="coordinate-descent optimizer (TV reward signal)")
     p_opt.add_argument("--param",   default="pi", help="pi | c_pi | retrieval")

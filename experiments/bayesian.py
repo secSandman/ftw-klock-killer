@@ -83,6 +83,15 @@ def _suggest_sig_retain(trial: "optuna.Trial") -> Dict[str, str]:
     }
 
 
+def _suggest_c_pi(trial: "optuna.Trial") -> Dict[str, str]:
+    return {
+        "KLOC_CPI_THRESHOLD":           str(round(trial.suggest_float("cpi_threshold",    0.25, 0.70, step=0.05), 2)),
+        "KLOC_CPI_BOILERPLATE_BONUS":   str(round(trial.suggest_float("cpi_bplate_bonus", 0.05, 0.35, step=0.05), 2)),
+        "KLOC_CPI_LOOP_FREE_BONUS":     str(round(trial.suggest_float("cpi_lf_bonus",     0.03, 0.20, step=0.01), 2)),
+        "KLOC_CPM_KQ_THRESHOLD":        str(trial.suggest_int("cpm_kq_threshold", 2, 6)),
+    }
+
+
 _SUGGEST_GROUPS = {
     "pi":         [_suggest_pi],
     "f4":         [_suggest_f4],
@@ -91,6 +100,8 @@ _SUGGEST_GROUPS = {
     "all":        [_suggest_pi, _suggest_f4, _suggest_tfidf, _suggest_sig_retain],
     "pi+tfidf":   [_suggest_pi, _suggest_tfidf],
     "pi+sig":     [_suggest_pi, _suggest_sig_retain],
+    "c_pi":       [_suggest_c_pi],
+    "c_all":      [_suggest_c_pi, _suggest_f4],
 }
 
 
